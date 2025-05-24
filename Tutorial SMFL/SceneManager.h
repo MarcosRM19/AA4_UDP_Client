@@ -1,6 +1,6 @@
 #pragma once
 #include "RegisterScene.h"
-#include "LobbyScene.h"
+#include "MatchMackingScene.h"
 #include "GameScene.h"
 
 #define SCENE SceneManager::Instance()

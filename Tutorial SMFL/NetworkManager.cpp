@@ -71,7 +71,7 @@ void NetworkManager::HandleP2PCommunication()
 			}
 			else
 			{
-				UpdateP2PClients();
+
 			}
 		}
 	}
@@ -132,7 +132,6 @@ void NetworkManager::Stop()
 		networkThread.join();
 
 	DisconnectServer();
-	DisconnectAllPeers();
 }
 
 void NetworkManager::ChangeState(NetworkState newState)
@@ -151,83 +150,6 @@ void NetworkManager::StartListening()
 		std::cout << "Listening on port: " << listener.getLocalPort() << std::endl;
 	else
 		std::cerr << "Failed to start Listening" << std::endl;
-}
-
-void NetworkManager::StartClientConnections(const std::vector<std::shared_ptr<Client>>& newClients, int myIndex, int port)
-{
-	p2pClients = newClients;
-
-	// Dirección IP local y puerto de escucha
-	std::optional<sf::IpAddress> localIp = sf::IpAddress::getLocalAddress();
-	int localPort = NETWORK.GetListeningPort();
-
-	// Primero, los clientes con índices menores intentan conectarse a los mayores
-	for (int i = 0; i < myIndex; ++i) // Índices menores
-	{
-		std::shared_ptr<Client>& newClient = p2pClients[i];
-		NetworkClient& network = newClient->GetNetwork();
-		std::optional<sf::IpAddress> ipAddress = sf::IpAddress::resolve(network.GetIp());
-
-		if (!ipAddress)
-			continue;
-
-		// Intentamos conectar al cliente con índice mayor
-		sf::Socket::Status status = network.GetSocket().connect(*ipAddress, network.GetPort());
-
-		if (status == sf::Socket::Status::Done)
-		{
-			network.GetSocket().setBlocking(false);
-
-			{
-				std::lock_guard<std::mutex> lock(selectorMutex);
-				socketSelector.add(network.GetSocket());
-			}
-
-			std::cout << "Connected to peer " << network.GetIp() << ":" << network.GetPort() << std::endl;
-
-			// Enviar el paquete de handshake
-			PACKET_MANAGER.SendHandshakeP2P(newClient);
-		}
-		else
-		{
-			std::cerr << "Failed to connect to peer " << network.GetIp() << std::endl;
-		}
-	}
-
-	// Ahora, los clientes con índices mayores aceptan conexiones de los menores
-	for (int i = myIndex + 1; i < p2pClients.size(); ++i) // Índices mayores
-	{
-		std::shared_ptr<Client>& newClient = p2pClients[i];
-		NetworkClient& network = newClient->GetNetwork();
-
-		// Usamos listener para aceptar conexiones entrantes
-		sf::TcpListener& listener = NETWORK.GetListener();
-
-		std::shared_ptr<sf::TcpSocket> newSocket = std::make_shared<sf::TcpSocket>();
-		if (listener.accept(*newSocket) == sf::Socket::Status::Done)
-		{
-			newSocket->setBlocking(false);
-			
-			{
-				std::lock_guard<std::mutex> lock(selectorMutex);
-				socketSelector.add(*newSocket);
-			}
-
-			// Asignar el socket al cliente
-			network.SetSocket(newSocket);
-
-			std::cout << "Listening for connections from " << newClient->GetNetwork().GetIp() << std::endl;
-
-			// Procesar handshake
-			PACKET_MANAGER.SendHandshakeP2P(newClient);
-		}
-		else
-		{
-			std::cerr << "Failed to accept connection for peer " << newClient->GetNetwork().GetIp() << std::endl;
-		}
-	}
-
-	ChangeState(NetworkState::CONNECTED_TO_PEERS);
 }
 
 bool NetworkManager::ConnectToServer()
@@ -280,25 +202,6 @@ void NetworkManager::DisconnectServer()
 
 	ChangeState(NetworkState::DISCONNECTED);
 	std::cout << "Disconnected from server" << std::endl;
-}
-
-void NetworkManager::DisconnectAllPeers()
-{
-	for (std::shared_ptr<Client> client : p2pClients)
-	{
-		if (client)
-		{
-			client->GetNetwork().GetSocket().disconnect();
-			socketSelector.remove(client->GetNetwork().GetSocket());
-			client->GetNetwork().GetSocket();
-		}
-	}
-
-	p2pClients.clear();
-
-
-	ChangeState(NetworkState::DISCONNECTED);
-	std::cout << "Disconnected from all peers" << std::endl;
 }
 
 void NetworkManager::HandleNewConnections()
@@ -356,46 +259,6 @@ void NetworkManager::HandleNewConnections()
 	}
 }
 
-void NetworkManager::UpdateP2PClients()
-{
-	for (std::shared_ptr<Client>& client : p2pClients)
-	{
-		if (!client)
-			continue;
-
-		sf::TcpSocket& socket = client->GetNetwork().GetSocket();
-		if (!NETWORK.GetSocketSelector().isReady(socket)) 
-			continue;
-
-		if (socket.getRemoteAddress() == sf::IpAddress::Any)
-			continue;
-
-		CustomPacket customPacket;
-		sf::Socket::Status status = socket.receive(customPacket.packet);
-
-		switch (status)
-		{
-		case sf::Socket::Status::Done :
-			PACKET_MANAGER.ProcessReceivedPacket(customPacket);
-			break;
-
-		case sf::Socket::Status::Disconnected:
-		{
-			std::cerr << "[P2P] Client disconnected: "<< *socket.getRemoteAddress() << ":" << socket.getRemotePort() << std::endl;
-
-				socket.disconnect();
-			{
-				std::lock_guard<std::mutex> lock(selectorMutex);
-				socketSelector.remove(socket);
-			}
-			break;
-		}
-		default:
-			std::cerr << "Error receiving packet: " << static_cast<int>(status) << std::endl;
-			break;
-		}
-	}
-}
 
 void NetworkManager::RefreshSelector()
 {
