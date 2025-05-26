@@ -5,7 +5,7 @@
 void main()
 {
 	//NETWORK.Init();
-	SCENE.InitScenes(new MatchMackingScene());
+	SCENE.InitScenes(new GameScene());
 	SCENE.Update();
 
 	
