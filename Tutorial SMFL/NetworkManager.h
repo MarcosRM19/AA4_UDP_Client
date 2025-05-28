@@ -42,7 +42,6 @@ private:
     NetworkManager& operator=(const NetworkManager&) = delete;
 
     void HandleServerCommunication();
-    void HandleP2PCommunication();
 
 public:
 

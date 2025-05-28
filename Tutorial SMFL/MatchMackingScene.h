@@ -18,7 +18,7 @@ public:
     void Exit() override;
     void Update(sf::RenderWindow& window, const sf::Event& event) override;
     void DetectRectangle(sf::Vector2f mousePosition) override;
-    void CreateButtons(sf::RenderWindow& window, int id);
+    void CreateButtons(sf::RenderWindow& window);
     void CreateCancelButtons(sf::RenderWindow& window);
     void Render(sf::RenderWindow& window);
 };

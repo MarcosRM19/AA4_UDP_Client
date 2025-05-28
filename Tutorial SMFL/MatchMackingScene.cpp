@@ -14,11 +14,7 @@ void MatchMackingScene::Enter(sf::RenderWindow& window)
 	searchingGame = false;
 
 	CreateCancelButtons(window);
-
-	for (int i = 0; i < 2; i++)
-	{
-		CreateButtons(window, i);
-	}
+	CreateButtons(window);
 }
 
 void MatchMackingScene::Exit()
@@ -39,7 +35,6 @@ void MatchMackingScene::DetectRectangle(sf::Vector2f mousePosition)
 
 			CustomPacket customPacket(CANCEL_QUEUE);
 
-			std::cout << "Cancel Queue" << std::endl;
 			//EVENT_MANAGER.Emit(customPacket.type, customPacket);
 			searchingGame = false;
 		}
@@ -48,22 +43,7 @@ void MatchMackingScene::DetectRectangle(sf::Vector2f mousePosition)
 	for (size_t i = 0; i < buttons.size(); i++) {
 		if (buttons[i].getGlobalBounds().contains(mousePosition) && !searchingGame) {
 
-			if (i == 0)
-			{
-				//Mandar paquete de que buscamos partida amistosa
-				CustomPacket customPacket(START_FRENDLY_QUEUE);
-
-				std::cout << "Searching Friendly Game" << std::endl;
-			}
-			else if (i == 1)
-			{
-				//Mandar paquete de que buscamos partida amistosa
-				CustomPacket customPacket(START_RANKED_QUEUE);
-
-				std::cout << "Searching Ranked Game" << std::endl;
-
-			}
-
+			CustomPacket customPacket(START_FRENDLY_QUEUE);
 			//EVENT_MANAGER.Emit(customPacket.type, customPacket);
 			searchingGame = true;
 		}
@@ -71,7 +51,7 @@ void MatchMackingScene::DetectRectangle(sf::Vector2f mousePosition)
 }
 
 
-void MatchMackingScene::CreateButtons(sf::RenderWindow& window, int id)
+void MatchMackingScene::CreateButtons(sf::RenderWindow& window)
 {
 	buttons.push_back(sf::RectangleShape());
 	buttonsTexts.push_back(sf::Text(SCENE.GetFont()));
@@ -81,33 +61,23 @@ void MatchMackingScene::CreateButtons(sf::RenderWindow& window, int id)
 		window.getSize().y / 2.f + 200.f
 	);
 	std::string text;
+	text = "Join Friendly Game";
 
-	if (id == 0)
-	{
-		position.x -= 200;
-		text = "Join Friendly Game";
-	}
-	else
-	{
-		position.x += 200;
-		text = "Join Ranked Game";
-	}
+	buttons[0].setSize({ 300.f, 75.f });
+	buttons[0].setFillColor(sf::Color::Green);
+	buttons[0].setOrigin(buttons[0].getSize() / 2.f);
+	buttons[0].setPosition(position);
 
-	buttons[id].setSize({ 300.f, 75.f });
-	buttons[id].setFillColor(sf::Color::Green);
-	buttons[id].setOrigin(buttons[id].getSize() / 2.f);
-	buttons[id].setPosition(position);
+	buttonsTexts[0].setString(text);
+	buttonsTexts[0].setFillColor(sf::Color::Black);
 
-	buttonsTexts[id].setString(text);
-	buttonsTexts[id].setFillColor(sf::Color::Black);
-
-	sf::FloatRect textBounds = buttonsTexts[id].getLocalBounds();
-	buttonsTexts[id].setOrigin(sf::Vector2f(
+	sf::FloatRect textBounds = buttonsTexts[0].getLocalBounds();
+	buttonsTexts[0].setOrigin(sf::Vector2f(
 		textBounds.position.x + textBounds.size.x / 2.f,
 		textBounds.position.y + textBounds.size.y / 2.f
 	));
 
-	buttonsTexts[id].setPosition(position);
+	buttonsTexts[0].setPosition(position);
 }
 
 void MatchMackingScene::CreateCancelButtons(sf::RenderWindow& window)

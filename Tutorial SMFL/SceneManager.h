@@ -4,8 +4,8 @@
 #include "GameScene.h"
 
 #define SCENE SceneManager::Instance()
-#define WIDTH 800
-#define HEIGHT 400
+#define WIDTH 850
+#define HEIGHT 850
 
 class SceneManager
 {
@@ -20,6 +20,8 @@ private:
 	sf::RenderWindow* window;
 	sf::Font font;
 
+	bool launcherFinished = false;
+
 public:
 	inline static SceneManager& Instance()
 	{
@@ -28,6 +30,7 @@ public:
 	}
 
 	void InitScenes(Scene* scene);
+	void ReadMap(std::string jsonContent);
 	void ChangeScene(Scene* scene);
 	
 	void Update();
@@ -35,5 +38,7 @@ public:
 	inline Scene* GetCurrentScene() { return currentScene; }
 	inline sf::RenderWindow& GetWindow() { return *window; }
 	inline const sf::Font& GetFont() const { return font; }
+
+	inline void SetLauncherFinished(bool state) { launcherFinished = state; }
 };
 
