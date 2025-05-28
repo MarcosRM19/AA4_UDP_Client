@@ -1,11 +1,11 @@
 #pragma once
 #include "RegisterScene.h"
-#include "LobbyScene.h"
+#include "MatchMackingScene.h"
 #include "GameScene.h"
 
 #define SCENE SceneManager::Instance()
-#define WIDTH 850
-#define HEIGHT 850
+#define WIDTH 800
+#define HEIGHT 400
 
 class SceneManager
 {

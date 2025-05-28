@@ -131,14 +131,14 @@ void RegisterScene::Render(sf::RenderWindow& window)
 
 void RegisterScene::DetectRectangle(sf::Vector2f mousePosition)
 {
-	for (size_t i = 0; i < textBackGround.size(); ++i) {
+	for (size_t i = 0; i < textBackGround.size(); i++) {
 		if (textBackGround[i].getGlobalBounds().contains(mousePosition)) {
 			inputText = std::string();
 			currentText = &texts[i];
 		}
 	}
 
-	for (size_t i = 0; i < buttons.size(); ++i) {
+	for (size_t i = 0; i < buttons.size(); i++) {
 		if (buttons[i].getGlobalBounds().contains(mousePosition)) {
 			currentText = nullptr;
 

@@ -135,7 +135,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Cell.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="CustomPacket.cpp" />
     <ClCompile Include="EventManager.cpp" />
@@ -154,7 +153,6 @@
     <ClCompile Include="SceneManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Cell.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="ClientState.h" />
     <ClInclude Include="CustomPacket.h" />

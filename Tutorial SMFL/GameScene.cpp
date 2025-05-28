@@ -4,6 +4,7 @@
 void GameScene::Enter(sf::RenderWindow& window)
 {
 	std::cout << "Enter Game Scene" << std::endl;
+	GAME.Init(window);
 }
 
 void GameScene::Exit()

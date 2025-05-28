@@ -60,13 +60,10 @@ public:
     void Stop();
 
     void StartListening();
-    void StartClientConnections(const std::vector < std::shared_ptr<Client>>& newClients, int myIndex, int port);
     bool ConnectToServer();
     void DisconnectServer();
-    void DisconnectAllPeers();
 
     void HandleNewConnections();
-    void UpdateP2PClients();
 
     void ChangeState(NetworkState newState);
     void RefreshSelector();

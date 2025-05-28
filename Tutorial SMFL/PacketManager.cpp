@@ -23,10 +23,10 @@ void PacketManager::HandleTest(sf::Packet& packet)
 
 void PacketManager::SendHandshake(const std::string guid)
 {
-	CustomPacket customPacket(HANDSHAKE);
-	customPacket.packet << "Hello Server, I'm the new client";
+	//CustomPacket customPacket(HANDSHAKE);
+	//customPacket.packet << "Hello Server, I'm the new client";
 
-	SendPacketToServer(customPacket);
+	//SendPacketToServer(customPacket);
 }
 
 void PacketManager::Init()
@@ -54,7 +54,7 @@ void PacketManager::Init()
 
 	EVENT_MANAGER.Subscribe(REGISTER_SUCCES, [this](CustomPacket& customPacket) {
 		std::cout << "Register succes" << std::endl;
-		SCENE.ChangeScene(new LobbyScene());
+		SCENE.ChangeScene(new MatchMackingScene());
 		});
 
 	EVENT_MANAGER.Subscribe(LOGIN, [this](CustomPacket& customPacket) {
@@ -77,7 +77,7 @@ void PacketManager::Init()
 
 	EVENT_MANAGER.Subscribe(LOGIN_SUCCESS, [this](CustomPacket& customPacket) {
 		std::cout << "Login succes" << std::endl;
-		SCENE.ChangeScene(new LobbyScene());
+		SCENE.ChangeScene(new MatchMackingScene());
 		});
 
 	EVENT_MANAGER.Subscribe(START_GAME, [this](CustomPacket& customPacket) {
