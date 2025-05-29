@@ -22,26 +22,6 @@ void SceneManager::InitScenes(Scene* scene)
 	launcherFinished = true;
 }
 
-void SceneManager::ReadMap(std::string jsonContent)
-{
-	std::string folderPath = "../Assets/Maps/";
-	std::string savePath = folderPath + "map1.json";
-
-	std::filesystem::create_directories(folderPath);
-
-	std::ofstream file(savePath);
-	if (file.is_open()) 
-	{
-		file << jsonContent;
-		file.close();
-		std::cout << "Map saved to " << savePath << std::endl;
-	}
-	else 
-	{
-		std::cerr << "Failed to open file for writing: " << savePath << std::endl;
-	}
-}
-
 void SceneManager::ChangeScene(Scene* scene)
 {
 	currentScene->Exit();

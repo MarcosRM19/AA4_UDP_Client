@@ -43,7 +43,7 @@ void MatchMackingScene::DetectRectangle(sf::Vector2f mousePosition)
 	for (size_t i = 0; i < buttons.size(); i++) {
 		if (buttons[i].getGlobalBounds().contains(mousePosition) && !searchingGame) {
 
-			CustomPacket customPacket(START_FRENDLY_QUEUE);
+			CustomPacket customPacket(START_QUEUE);
 			//EVENT_MANAGER.Emit(customPacket.type, customPacket);
 			searchingGame = true;
 		}

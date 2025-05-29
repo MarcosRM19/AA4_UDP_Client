@@ -37,10 +37,6 @@ std::vector<int> GameManager::ExtractTileData(const std::string& json) {
 
 void GameManager::InitMap()
 {
-    std::ifstream file("../Assets/Maps/map1.json");
-    buffer << file.rdbuf();
-    json = buffer.str();
-
     width = ExtractInt(json, "\"width\"");
     height = ExtractInt(json, "\"height\"");
     tileWidth = ExtractInt(json, "\"tilewidth\"");

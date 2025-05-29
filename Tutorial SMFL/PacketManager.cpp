@@ -98,7 +98,7 @@ void PacketManager::Init()
 		SendPacketToServer(customPacket);
 		});
 
-	EVENT_MANAGER.Subscribe(START_FRENDLY_QUEUE, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.Subscribe(START_QUEUE, [this](CustomPacket& customPacket) {
 		std::cout << "Start Friendly Queue" << std::endl;
 		SendPacketToServer(customPacket);
 		});
@@ -114,7 +114,7 @@ void PacketManager::Init()
 		std::string jsonContent;
 		customPacket.packet >> jsonContent;
 
-		SCENE.ReadMap(jsonContent);
+		GAME.SetJson(jsonContent);
 		SCENE.InitScenes(new RegisterScene());
 		});	
 }

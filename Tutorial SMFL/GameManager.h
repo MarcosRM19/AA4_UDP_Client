@@ -42,4 +42,6 @@ public:
 
     void HandleEvent(const sf::Event& event, sf::RenderWindow& window);
 
+    inline void SetJson(std::string _json) { json = _json; }
+
 };

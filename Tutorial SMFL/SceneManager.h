@@ -30,7 +30,6 @@ public:
 	}
 
 	void InitScenes(Scene* scene);
-	void ReadMap(std::string jsonContent);
 	void ChangeScene(Scene* scene);
 	
 	void Update();
