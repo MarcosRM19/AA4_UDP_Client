@@ -8,6 +8,7 @@ void main()
 	if (NETWORK.ConnectToServer())
 	{
 		NETWORK.Start();
+		SCENE.InitScenes();
 		SCENE.Update();
 	}
 }

@@ -71,10 +71,7 @@ void NetworkManager::Start()
 		{
 			Update();
 		}
-		});
-
-	CustomPacket customPacket(ASK_MAP);
-	//EVENT_MANAGER.Emit(customPacket.type, customPacket);
+		});	
 }
 
 void NetworkManager::Update()
@@ -183,13 +180,6 @@ void NetworkManager::RefreshSelector()
 	if (currentState == NetworkState::CONNECTED_TO_SERVER)
 	{
 		socketSelector.add(*serverSocket);
-	}
-	else if (currentState == NetworkState::CONNECTED_TO_PEERS)
-	{
-		for (std::shared_ptr<Client> client : p2pClients)
-			socketSelector.add(client->GetNetwork().GetSocket());
-
-		socketSelector.add(listener);
 	}
 }
 

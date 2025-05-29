@@ -28,22 +28,22 @@ void RegisterScene::CreateButtons(sf::RenderWindow& window, int id)
 
 	sf::Vector2f position(
 		window.getSize().x / 2.f,
-		window.getSize().y / 2.f + 200.f
+		window.getSize().y / 2.f + 100.f
 	);
 	std::string text;
 
 	if (id == 0)
 	{
-		position.x -= 200;
+		position.x -= 150;
 		text = "Register";
 	}
 	else
 	{
-		position.x += 200;
+		position.x += 150;
 		text = "Login";
 	}
 
-	buttons[id].setSize({ 300.f, 75.f });
+	buttons[id].setSize({ 200.f, 75.f });
 	buttons[id].setFillColor(sf::Color::Green);
 	buttons[id].setOrigin(buttons[id].getSize() / 2.f);
 	buttons[id].setPosition(position);
@@ -68,18 +68,18 @@ void RegisterScene::CreateTextField(sf::RenderWindow& window, int id)
 
 	sf::Vector2f position(
 		window.getSize().x / 2.f,
-		window.getSize().y / 2.f - 100.f
+		window.getSize().y / 2.f - 50.f
 	);
 	std::string text;
 
 	if (id == 0)
 	{
-		position.x -= 200;
+		position.x -= 150;
 		text = "Name";
 	}
 	else
 	{
-		position.x += 200;
+		position.x += 150;
 		text = "Password";
 	}
 

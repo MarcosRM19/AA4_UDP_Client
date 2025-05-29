@@ -35,7 +35,7 @@ void MatchMackingScene::DetectRectangle(sf::Vector2f mousePosition)
 
 			CustomPacket customPacket(CANCEL_QUEUE);
 
-			//EVENT_MANAGER.Emit(customPacket.type, customPacket);
+			EVENT_MANAGER.Emit(customPacket.type, customPacket);
 			searchingGame = false;
 		}
 	}
@@ -44,7 +44,7 @@ void MatchMackingScene::DetectRectangle(sf::Vector2f mousePosition)
 		if (buttons[i].getGlobalBounds().contains(mousePosition) && !searchingGame) {
 
 			CustomPacket customPacket(START_QUEUE);
-			//EVENT_MANAGER.Emit(customPacket.type, customPacket);
+			EVENT_MANAGER.Emit(customPacket.type, customPacket);
 			searchingGame = true;
 		}
 	}
@@ -57,8 +57,8 @@ void MatchMackingScene::CreateButtons(sf::RenderWindow& window)
 	buttonsTexts.push_back(sf::Text(SCENE.GetFont()));
 
 	sf::Vector2f position(
-		window.getSize().x / 2.f,
-		window.getSize().y / 2.f + 200.f
+		window.getSize().x / 2.f - 150,
+		window.getSize().y / 2.f
 	);
 	std::string text;
 	text = "Join Friendly Game";
@@ -86,8 +86,8 @@ void MatchMackingScene::CreateCancelButtons(sf::RenderWindow& window)
 	cancelButtonsTexts.push_back(sf::Text(SCENE.GetFont()));
 
 	sf::Vector2f position(
-		window.getSize().x / 2.f,
-		window.getSize().y / 2.f + 300.f
+		window.getSize().x / 2.f + 150,
+		window.getSize().y / 2.f
 	);
 
 	std::string text;

@@ -1,5 +1,6 @@
 #include "GameScene.h"
 #include "GameManager.h"
+#include "SceneManager.h"
 
 void GameScene::Enter(sf::RenderWindow& window)
 {

@@ -115,7 +115,8 @@ void PacketManager::Init()
 		customPacket.packet >> jsonContent;
 
 		GAME.SetJson(jsonContent);
-		SCENE.InitScenes(new RegisterScene());
+		SCENE.ChangeScene(new RegisterScene());
+		SCENE.SetLauncherFinished(true);
 		});	
 }
 

@@ -4,8 +4,8 @@
 #include "GameScene.h"
 
 #define SCENE SceneManager::Instance()
-#define WIDTH 850
-#define HEIGHT 850
+#define WIDTH 800
+#define HEIGHT 500
 
 class SceneManager
 {
@@ -29,7 +29,7 @@ public:
 		return manager;
 	}
 
-	void InitScenes(Scene* scene);
+	void InitScenes();
 	void ChangeScene(Scene* scene);
 	
 	void Update();
