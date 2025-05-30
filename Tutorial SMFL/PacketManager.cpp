@@ -52,7 +52,7 @@ void PacketManager::Init()
 		std::cout << "Register error: " << responseMessage << std::endl;
 		});
 
-	EVENT_MANAGER.Subscribe(REGISTER_SUCCES, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.Subscribe(REGISTER_SUCCESS, [this](CustomPacket& customPacket) {
 		std::cout << "Register succes" << std::endl;
 		SCENE.ChangeScene(new MatchMackingScene());
 		});
@@ -91,13 +91,27 @@ void PacketManager::Init()
 		
 		});
 
-	EVENT_MANAGER.Subscribe(CANCEL_QUEUE, [this](CustomPacket& customPacket) {
-		std::cout << "Cancel Queue" << std::endl;
+	EVENT_MANAGER.Subscribe(START_QUEUE, [this](CustomPacket& customPacket) {
+		std::cout << "Start Queue" << std::endl;
 		SendPacketToServer(customPacket);
 		});
 
-	EVENT_MANAGER.Subscribe(START_QUEUE, [this](CustomPacket& customPacket) {
-		std::cout << "Start Friendly Queue" << std::endl;
+	EVENT_MANAGER.Subscribe(START_QUEUE_RESULT, [this](CustomPacket& customPacket) {
+		std::string result;
+		customPacket.packet >> result;
+		
+		std::cout << result << std::endl;
+		});
+
+	EVENT_MANAGER.Subscribe(CANCEL_QUEUE_RESULT, [this](CustomPacket& customPacket) {
+		std::string result;
+		customPacket.packet >> result;
+
+		std::cout << result << std::endl;
+		});
+
+	EVENT_MANAGER.Subscribe(CANCEL_QUEUE, [this](CustomPacket& customPacket) {
+		std::cout << "Cancel Queue" << std::endl;
 		SendPacketToServer(customPacket);
 		});
 

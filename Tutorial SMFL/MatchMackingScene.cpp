@@ -34,7 +34,6 @@ void MatchMackingScene::DetectRectangle(sf::Vector2f mousePosition)
 		if (cancelButtons[i].getGlobalBounds().contains(mousePosition) && searchingGame) {
 
 			CustomPacket customPacket(CANCEL_QUEUE);
-			std::cout << "ENTRO 2";
 			EVENT_MANAGER.Emit(customPacket.type, customPacket);
 			searchingGame = false;
 		}
@@ -44,7 +43,6 @@ void MatchMackingScene::DetectRectangle(sf::Vector2f mousePosition)
 		if (buttons[i].getGlobalBounds().contains(mousePosition) && !searchingGame) {
 
 			CustomPacket customPacket(START_QUEUE);
-			std::cout << "ENTRO 1";
 			EVENT_MANAGER.Emit(customPacket.type, customPacket);
 			searchingGame = true;
 		}
