@@ -32,7 +32,7 @@ void NetworkManager::HandleServerCommunication()
 				{
 					PACKET_MANAGER.ProcessReceivedPacket(customPacket);
 				}
-				else
+				else if(status == sf::Socket::Status::Disconnected)
 				{
 					std::cerr << "The server has disconnected" << std::endl;
 					serverSocket->disconnect();
@@ -157,7 +157,6 @@ bool NetworkManager::ConnectToServer()
 
 void NetworkManager::DisconnectServer()
 {
-
 	if (serverSocket)
 	{
 		serverSocket->disconnect();

@@ -81,9 +81,7 @@ void PacketManager::Init()
 		});
 
 	EVENT_MANAGER.Subscribe(START_GAME, [this](CustomPacket& customPacket) {
-		std::cout << "Start Game" << std::endl;
-
-		
+		std::cout << "Start Game" << std::endl;		
 
 		});
 
