@@ -1,5 +1,8 @@
 #pragma once
 #include "Bullet.h"
+#include "CustomUDPPacket.h"
+
+const sf::Time interval = sf::seconds(0.2f);
 
 class Player
 {
@@ -27,6 +30,10 @@ private:
 
     void Shoot();
 
+    int id = 0;
+    std::vector<CustomUDPPacket> positionsPackets;
+    sf::Clock sendPositionClock;
+
 public:
     Player(sf::Vector2f startPosition, sf::Color color);
 
@@ -39,6 +46,8 @@ public:
     inline void MoveHorizontally(float moveX) { position.x += moveX; shape.setPosition(position); }
     inline void MoveVertically(float moveY) { position.y += moveY; shape.setPosition(position); }
 
+    void SendPosition();
+
     sf::FloatRect GetNextBounds(float deltaTime) const;
     inline sf::Vector2f GetVelocity() { return velocity; }
     inline sf::Vector2f GetPosition() const { return position; }
@@ -48,5 +57,6 @@ public:
     
     inline void StopVertical() { velocity.y = 0.f; }
     inline void SetIsOnGround(bool _isOnGround) { isOnGround = _isOnGround; }
+
 };
 

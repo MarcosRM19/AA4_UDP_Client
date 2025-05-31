@@ -33,19 +33,22 @@ void MatchMackingScene::Render(sf::RenderWindow& window)
 
 	window.clear(brown);
 
-	if (searchingGame)
+	if (NETWORK.GetNetworkState() == NetworkState::CONNECTED_TO_SERVER_TCP)
 	{
-		for (sf::RectangleShape buton : cancelButtons)
-			window.draw(buton);
-		for (sf::Text text : cancelButtonsTexts)
-			window.draw(text);
-	}
-	else
-	{
-		for (sf::RectangleShape buton : buttons)
-			window.draw(buton);
-		for (sf::Text text : buttonsTexts)
-			window.draw(text);
+		if (searchingGame)
+		{
+			for (sf::RectangleShape buton : cancelButtons)
+				window.draw(buton);
+			for (sf::Text text : cancelButtonsTexts)
+				window.draw(text);
+		}
+		else
+		{
+			for (sf::RectangleShape buton : buttons)
+				window.draw(buton);
+			for (sf::Text text : buttonsTexts)
+				window.draw(text);
+		}
 	}
 
 	window.display();
@@ -53,6 +56,9 @@ void MatchMackingScene::Render(sf::RenderWindow& window)
 
 void MatchMackingScene::DetectRectangle(sf::Vector2f mousePosition)
 {
+	if (NETWORK.GetNetworkState() != NetworkState::CONNECTED_TO_SERVER_TCP)
+		return;
+
 	for (size_t i = 0; i < cancelButtons.size(); i++) {
 		if (cancelButtons[i].getGlobalBounds().contains(mousePosition) && searchingGame) {
 

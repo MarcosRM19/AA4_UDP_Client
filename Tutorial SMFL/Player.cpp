@@ -1,5 +1,6 @@
 #include "Player.h"
 #include <iostream>
+#include "EventManager.h"
 
 Player::Player(sf::Vector2f startPosition, sf::Color color)
 {
@@ -105,6 +106,7 @@ void Player::Update(float deltaTime)
     }
 
     shape.setPosition(position);
+    SendPosition();
 }
 
 void Player::Shoot()
@@ -131,6 +133,25 @@ void Player::Render(sf::RenderWindow& window)
     for (const std::shared_ptr<Bullet>& bullet : bullets)
     {
         bullet->Render(window);
+    }
+}
+
+void Player::SendPosition()
+{
+    if (sendPositionClock.getElapsedTime() >= interval)
+    {
+        CustomUDPPacket customPacket(UdpPacketType::NORMAL, SEND_POSITION);
+
+        customPacket.WriteVariable(id);
+        customPacket.WriteVariable(position.x);
+        customPacket.WriteVariable(position.y);
+
+        std::cout << "Position X: " << position.x << ", Position Y: " << position.y << std::endl;
+
+        positionsPackets.push_back(customPacket);
+        EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
+
+        sendPositionClock.restart();
     }
 }
 
