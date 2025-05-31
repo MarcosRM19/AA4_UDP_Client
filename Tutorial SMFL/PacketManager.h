@@ -1,5 +1,6 @@
 #pragma once
 #include "CustomPacket.h"
+#include "CustomUDPPacket.h"
 #include "Client.h"
 
 #define PACKET_MANAGER PacketManager::Instance()
@@ -27,9 +28,10 @@ public:
     void Init();
 
     void SendHandshake(const std::string guid);
-    void ProcessReceivedPacket(CustomPacket& customPacket);
+    void ProcessTCPReceivedPacket(CustomTCPPacket& customPacket);
+    void ProcessUDPReceivedPacket(CustomUDPPacket& customPacket);
 
-    void SendPacketToClient(const std::shared_ptr<Client> client, CustomPacket& responsePacket);
-    void SendPacketToServer(CustomPacket& responsePacket);
+    void SendPacketToUDPServer(CustomUDPPacket& responsePacket);
+    void SendPacketToTCPServer(CustomTCPPacket& responsePacket);
 };
 

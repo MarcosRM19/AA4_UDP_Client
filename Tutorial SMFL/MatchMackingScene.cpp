@@ -33,8 +33,8 @@ void MatchMackingScene::DetectRectangle(sf::Vector2f mousePosition)
 	for (size_t i = 0; i < cancelButtons.size(); i++) {
 		if (cancelButtons[i].getGlobalBounds().contains(mousePosition) && searchingGame) {
 
-			CustomPacket customPacket(CANCEL_QUEUE);
-			EVENT_MANAGER.Emit(customPacket.type, customPacket);
+			CustomTCPPacket customPacket(CANCEL_QUEUE);
+			EVENT_MANAGER.TCPEmit(customPacket.type, customPacket);
 			searchingGame = false;
 		}
 	}
@@ -42,8 +42,8 @@ void MatchMackingScene::DetectRectangle(sf::Vector2f mousePosition)
 	for (size_t i = 0; i < buttons.size(); i++) {
 		if (buttons[i].getGlobalBounds().contains(mousePosition) && !searchingGame) {
 
-			CustomPacket customPacket(START_QUEUE);
-			EVENT_MANAGER.Emit(customPacket.type, customPacket);
+			CustomTCPPacket customPacket(START_QUEUE);
+			EVENT_MANAGER.TCPEmit(customPacket.type, customPacket);
 			searchingGame = true;
 		}
 	}

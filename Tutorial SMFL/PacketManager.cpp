@@ -23,28 +23,28 @@ void PacketManager::HandleTest(sf::Packet& packet)
 
 void PacketManager::SendHandshake(const std::string guid)
 {
-	CustomPacket customPacket(HANDSHAKE);
+	CustomTCPPacket customPacket(HANDSHAKE);
 	customPacket.packet << "Hello Server, I'm the new client";
 
-	SendPacketToServer(customPacket);
+	SendPacketToTCPServer(customPacket);
 }
 
 void PacketManager::Init()
 {
-	EVENT_MANAGER.Subscribe(HANDSHAKE, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.TCPSubscribe(HANDSHAKE, [this](CustomTCPPacket& customPacket) {
 		HandleHandshake(customPacket.packet);
 		});
 
-	EVENT_MANAGER.Subscribe(REGISTER, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.TCPSubscribe(REGISTER, [this](CustomTCPPacket& customPacket) {
 		std::string username;
 		std::string password;
 		customPacket.packet >> username >> password;
 
-		SendPacketToServer(customPacket);
+		SendPacketToTCPServer(customPacket);
 
 		});
 
-	EVENT_MANAGER.Subscribe(REGISTER_ERROR, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.TCPSubscribe(REGISTER_ERROR, [this](CustomTCPPacket& customPacket) {
 		std::string responseMessage;
 
 		customPacket.packet >> responseMessage;
@@ -52,21 +52,21 @@ void PacketManager::Init()
 		std::cout << "Register error: " << responseMessage << std::endl;
 		});
 
-	EVENT_MANAGER.Subscribe(REGISTER_SUCCESS, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.TCPSubscribe(REGISTER_SUCCESS, [this](CustomTCPPacket& customPacket) {
 		std::cout << "Register succes" << std::endl;
 		SCENE.ChangeScene(new MatchMackingScene());
 		});
 
-	EVENT_MANAGER.Subscribe(LOGIN, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.TCPSubscribe(LOGIN, [this](CustomTCPPacket& customPacket) {
 
 		std::string username;
 		std::string password;
 		customPacket.packet >> username >> password;
 
-		SendPacketToServer(customPacket);
+		SendPacketToTCPServer(customPacket);
 		});
 
-	EVENT_MANAGER.Subscribe(LOGIN_ERROR, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.TCPSubscribe(LOGIN_ERROR, [this](CustomTCPPacket& customPacket) {
 		std::string responseMessage;
 
 		customPacket.packet >> responseMessage;
@@ -75,52 +75,62 @@ void PacketManager::Init()
 
 		});
 
-	EVENT_MANAGER.Subscribe(LOGIN_SUCCESS, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.TCPSubscribe(LOGIN_SUCCESS, [this](CustomTCPPacket& customPacket) {
 		std::cout << "Login succes" << std::endl;
 		SCENE.ChangeScene(new MatchMackingScene());
 		});
 
-	EVENT_MANAGER.Subscribe(START_GAME, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.TCPSubscribe(START_GAME, [this](CustomTCPPacket& customPacket) {
 		std::cout << "Start Game" << std::endl;		
+		NETWORK.DisconnectTCPServer();
 
+		std::string ipString;
+		int port;
+
+		customPacket.packet >> ipString;
+		customPacket.packet >> port;
+
+		std::optional<sf::IpAddress> ipAddress = sf::IpAddress::resolve(ipString);
+
+		NETWORK.ConnectToUDPServer(*ipAddress, port);
 		});
 
 
-	EVENT_MANAGER.Subscribe(DISCONNECT, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.TCPSubscribe(DISCONNECT, [this](CustomTCPPacket& customPacket) {
 
 		
 		});
 
-	EVENT_MANAGER.Subscribe(START_QUEUE, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.TCPSubscribe(START_QUEUE, [this](CustomTCPPacket& customPacket) {
 		std::cout << "Start Queue" << std::endl;
-		SendPacketToServer(customPacket);
+		SendPacketToTCPServer(customPacket);
 		});
 
-	EVENT_MANAGER.Subscribe(START_QUEUE_RESULT, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.TCPSubscribe(START_QUEUE_RESULT, [this](CustomTCPPacket& customPacket) {
 		std::string result;
 		customPacket.packet >> result;
 		
 		std::cout << result << std::endl;
 		});
 
-	EVENT_MANAGER.Subscribe(CANCEL_QUEUE_RESULT, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.TCPSubscribe(CANCEL_QUEUE_RESULT, [this](CustomTCPPacket& customPacket) {
 		std::string result;
 		customPacket.packet >> result;
 
 		std::cout << result << std::endl;
 		});
 
-	EVENT_MANAGER.Subscribe(CANCEL_QUEUE, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.TCPSubscribe(CANCEL_QUEUE, [this](CustomTCPPacket& customPacket) {
 		std::cout << "Cancel Queue" << std::endl;
-		SendPacketToServer(customPacket);
+		SendPacketToTCPServer(customPacket);
 		});
 
-	EVENT_MANAGER.Subscribe(ASK_MAP, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.TCPSubscribe(ASK_MAP, [this](CustomTCPPacket& customPacket) {
 		std::cout << "Ask Map" << std::endl;
-		SendPacketToServer(customPacket);
+		SendPacketToTCPServer(customPacket);
 		});
 
-	EVENT_MANAGER.Subscribe(RECEIVE_MAP, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.TCPSubscribe(RECEIVE_MAP, [this](CustomTCPPacket& customPacket) {
 		std::cout << "Map Received" << std::endl;
 
 		std::string jsonContent;
@@ -130,26 +140,48 @@ void PacketManager::Init()
 		SCENE.ChangeScene(new RegisterScene());
 		SCENE.SetLauncherFinished(true);
 		});	
+
+	EVENT_MANAGER.UDPSubscribe(START_UDP_GAME, [this](CustomUDPPacket& customPacket) {
+		SCENE.ChangeScene(new GameScene());
+		});
+
+	EVENT_MANAGER.UDPSubscribe(SEND_POSITION, [this](CustomUDPPacket& customPacket) {
+		std::cout << "Position Send"<<std::endl;
+		SendPacketToUDPServer(customPacket);
+		});
+
+	EVENT_MANAGER.UDPSubscribe(ACK, [this](CustomUDPPacket& customPacket) {
+		std::cout << "Send ACK packet" << std::endl;
+		SendPacketToUDPServer(customPacket);
+		});
 }
 
-void PacketManager::ProcessReceivedPacket(CustomPacket& customPacket)
+void PacketManager::ProcessTCPReceivedPacket(CustomTCPPacket& customPacket)
 {
 	customPacket.packet >> customPacket.type;
-	//std::cout << customPacket.type << std::endl;
-	EVENT_MANAGER.Emit(customPacket.type, customPacket);
+	std::cout << customPacket.type << std::endl;
+	EVENT_MANAGER.TCPEmit(customPacket.type, customPacket);
 }
 
-void PacketManager::SendPacketToClient(const std::shared_ptr<Client> client, CustomPacket& responsePacket)
+void PacketManager::ProcessUDPReceivedPacket(CustomUDPPacket& customPacket)
 {
-	sf::Socket::Status status = client->GetNetwork().GetSocket().send(responsePacket.packet);
-	if (status == sf::Socket::Status::Done)
-		std::cout << "Message sent to client: " <<client->GetNetwork().GetIp()<<" "<<client->GetNetwork().GetPort() << std::endl;
+	std::cout << customPacket.type << std::endl;
+	EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
+}
+
+void PacketManager::SendPacketToUDPServer(CustomUDPPacket& responsePacket)
+{
+	if (NETWORK.GetUDPSocket()->send(responsePacket.buffer, responsePacket.bufferSize, NETWORK.GetUDPIPAdrres(), NETWORK.GetUDPPort()) == sf::Socket::Status::Done)
+	{
+		std::cout << "Packet send to UDP server" << std::endl;
+	}
 	else
 	{
-		std::cout << "The error is: " << static_cast<int>(status) << std::endl;	}
+		std::cout << "Error sending packet to UDP server" << std::endl;
+	}
 }
 
-void PacketManager::SendPacketToServer(CustomPacket& customPacket)
+void PacketManager::SendPacketToTCPServer(CustomTCPPacket& customPacket)
 {
 	if (NETWORK.GetServerSocket()->send(customPacket.packet) == sf::Socket::Status::Done)
 	{

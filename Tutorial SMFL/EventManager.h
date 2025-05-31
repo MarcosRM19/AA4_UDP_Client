@@ -14,17 +14,22 @@
 class EventManager
 {
 public:
-    using Callback = std::function<void(CustomPacket&)>;
+    using TCPCallback = std::function<void(CustomTCPPacket&)>;
+    using UDPCallback = std::function<void(CustomUDPPacket&)>;
 
-    void Subscribe(const PacketType type, Callback callback);
 
-    void Emit(const PacketType type, CustomPacket customPacket);
+    void TCPSubscribe(const PacketType type, TCPCallback callback);
+    void UDPSubscribe(const PacketType type, UDPCallback callback);
+
+    void TCPEmit(const PacketType type, CustomTCPPacket customPacket);
+    void UDPEmit(const PacketType type, CustomUDPPacket customPacket);
 
     static EventManager& Instance();
 
 private:
 
-    std::unordered_map<PacketType, std::vector<Callback>> subscribers;
+    std::unordered_map<PacketType, std::vector<TCPCallback>> TCPsubscribers;
+    std::unordered_map<PacketType, std::vector<UDPCallback>> UDPsubscribers;
 
     EventManager() = default;
     EventManager(const EventManager&) = delete;

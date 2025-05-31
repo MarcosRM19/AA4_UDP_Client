@@ -137,6 +137,7 @@
   <ItemGroup>
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="CustomPacket.cpp" />
+    <ClCompile Include="CustomUDPPacket.cpp" />
     <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="GameScene.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="Client.h" />
     <ClInclude Include="ClientState.h" />
     <ClInclude Include="CustomPacket.h" />
+    <ClInclude Include="CustomUDPPacket.h" />
     <ClInclude Include="EventManager.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="GameScene.h" />
@@ -172,6 +174,7 @@
     <ClInclude Include="RegisterScene.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="UDPPacketType.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Tutorial SMFL.rc" />
