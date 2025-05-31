@@ -9,13 +9,15 @@ public:
     CustomUDPPacket() = default;
     CustomUDPPacket(UdpPacketType udpType, PacketType type);
 
-    void ReadBuffer(char buffer[1024], size_t _bufferSize);
+    void ReadBuffer(const char* inputBuffer, size_t _bufferSize);
 
     PacketType type;
     UdpPacketType udpType;
 
     char buffer[1024];
     size_t bufferSize;
+
+    size_t payloadOffset;
 
     template<typename T>
     bool WriteVariable(const T& data)

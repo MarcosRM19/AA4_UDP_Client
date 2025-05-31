@@ -9,15 +9,18 @@ CustomUDPPacket::CustomUDPPacket(UdpPacketType udpType, PacketType type)
 	WriteVariable(type);
 }
 
-void CustomUDPPacket::ReadBuffer(char buffer[1024], size_t _bufferSize)
+void CustomUDPPacket::ReadBuffer(const char* inputBuffer, size_t _bufferSize)
 {
 	size_t offset = 0;
+
+	// Copiamos todo el paquete al buffer interno, incluyendo cabecera y payload
+	std::memcpy(buffer, inputBuffer, _bufferSize);
+	bufferSize = _bufferSize;
 
 	ReadVariable(udpType, offset);
 	ReadVariable(type, offset);
 
-	std::memcpy(buffer, buffer + offset, _bufferSize - offset);
-	bufferSize = _bufferSize - offset;
+	payloadOffset = offset;
 }
 
 bool CustomUDPPacket::WriteString(const std::string& str)

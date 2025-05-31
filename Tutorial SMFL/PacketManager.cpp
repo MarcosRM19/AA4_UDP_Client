@@ -158,7 +158,8 @@ void PacketManager::Init()
 
 		//Read the ID from the customPacket buffer
 		int idMessage = 0;
-		customPacket.ReadVariable(idMessage, customPacket.bufferSize);
+		size_t size = sizeof(customPacket.udpType) + sizeof(customPacket.type);
+		customPacket.ReadVariable(idMessage, size);
 
 		//Reload the buffer with the ID from the customPacket
 		_customPacket.WriteVariable(idMessage);
@@ -186,7 +187,8 @@ void PacketManager::ProcessUDPReceivedPacket(CustomUDPPacket& customPacket)
 
 void PacketManager::SendPacketToUDPServer(CustomUDPPacket& responsePacket)
 {
-	if (NETWORK.GetUDPSocket()->send(responsePacket.buffer, responsePacket.bufferSize, NETWORK.GetUDPIPAdrres(), NETWORK.GetUDPPort()) == sf::Socket::Status::Done)
+	NETWORK.ConnectToUDPServer(SERVER_IP, 55002);
+	if (NETWORK.GetUDPSocket()->send(responsePacket.buffer, responsePacket.bufferSize, SERVER_IP, 55002) == sf::Socket::Status::Done)
 	{
 		std::cout << "Packet send to UDP server" << std::endl;
 	}
