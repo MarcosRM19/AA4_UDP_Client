@@ -61,36 +61,30 @@ void NetworkManager::HandleUDPServerCommunication()
 		if (state != NetworkState::CONNECTED_TO_SERVER_UDP)
 			break;
 
-		if (socketSelector.wait(sf::seconds(0.1f)))
+		std::optional<sf::IpAddress> senderIP;
+		unsigned short senderPort;
+
+		sf::Socket::Status status = udpSocket->receive(udpBuffer, sizeof(udpBuffer), udpReceivedSize, senderIP, senderPort);
+
+		if (status == sf::Socket::Status::Done)
 		{
-			if (socketSelector.isReady(*udpSocket))
+			CustomUDPPacket customPacket;
+			customPacket.ReadBuffer(udpBuffer, udpReceivedSize);
+
+			PACKET_MANAGER.ProcessUDPReceivedPacket(customPacket);
+			ClearBuffer();
+		}
+		else if (status == sf::Socket::Status::Disconnected)
+		{
+			std::cerr << "The server UDP has disconnected" << std::endl;
+			udpSocket->unbind();
+
 			{
-				std::optional<sf::IpAddress> senderIP;
-				unsigned short senderPort;
-
-				sf::Socket::Status status = udpSocket->receive(udpBuffer, sizeof(udpBuffer), udpReceivedSize, senderIP, senderPort);
-
-				if (status == sf::Socket::Status::Done)
-				{
-					CustomUDPPacket customPacket;
-					customPacket.ReadBuffer(udpBuffer, udpReceivedSize);
-					
-					PACKET_MANAGER.ProcessUDPReceivedPacket(customPacket);
-					ClearBuffer();
-				}
-				else if (status == sf::Socket::Status::Disconnected)
-				{
-					std::cerr << "The server UDP has disconnected" << std::endl;
-					udpSocket->unbind();
-
-					{
-						std::lock_guard<std::mutex> lock(selectorMutex);
-						socketSelector.remove(*udpSocket);
-					}
-
-					udpSocket.reset();
-				}
+				std::lock_guard<std::mutex> lock(selectorMutex);
+				socketSelector.remove(*udpSocket);
 			}
+
+			udpSocket.reset();
 		}
 	}
 }
@@ -258,10 +252,6 @@ void NetworkManager::RefreshSelector()
 	if (currentState == NetworkState::CONNECTED_TO_SERVER_TCP)
 	{
 		socketSelector.add(*serverSocket);
-	}
-	else if (currentState == NetworkState::CONNECTED_TO_SERVER_UDP)
-	{
-		socketSelector.add(*udpSocket);
 	}
 }
 
