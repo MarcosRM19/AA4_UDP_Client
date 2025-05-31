@@ -23,7 +23,7 @@ void PlayerData::CheckGroundCollision(float groundY)
 
 void PlayerData::Update(float deltaTime)
 {
-    HandleEvent();
+    //HandleEvent();
     ApplyGravity(deltaTime);
 
     position += velocity * deltaTime;
@@ -43,20 +43,20 @@ void PlayerData::HandleEvent(const sf::Event& event, sf::RenderWindow& window)
 {
     velocity.x = 0.f;
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-        velocity.x = -moveSpeed;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-        velocity.x = moveSpeed;
+    //if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+    //    velocity.x = -moveSpeed;
+    //if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+    //    velocity.x = moveSpeed;
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && isOnGround)
-    {
-        velocity.y = -jumpSpeed;
-        isOnGround = false;
-    }
+    //if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && isOnGround)
+    //{
+    //    velocity.y = -jumpSpeed;
+    //    isOnGround = false;
+    //}
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-    {
-        std::cout << "Interact button pressed\n";
-        // Aquí puedes lanzar un evento de interacción
-    }
+    //if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+    //{
+    //    std::cout << "Interact button pressed\n";
+    //    // Aquí puedes lanzar un evento de interacción
+    //}
 }

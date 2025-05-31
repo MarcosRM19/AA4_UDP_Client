@@ -23,10 +23,10 @@ void PacketManager::HandleTest(sf::Packet& packet)
 
 void PacketManager::SendHandshake(const std::string guid)
 {
-	//CustomPacket customPacket(HANDSHAKE);
-	//customPacket.packet << "Hello Server, I'm the new client";
+	CustomPacket customPacket(HANDSHAKE);
+	customPacket.packet << "Hello Server, I'm the new client";
 
-	//SendPacketToServer(customPacket);
+	SendPacketToServer(customPacket);
 }
 
 void PacketManager::Init()
@@ -52,7 +52,7 @@ void PacketManager::Init()
 		std::cout << "Register error: " << responseMessage << std::endl;
 		});
 
-	EVENT_MANAGER.Subscribe(REGISTER_SUCCES, [this](CustomPacket& customPacket) {
+	EVENT_MANAGER.Subscribe(REGISTER_SUCCESS, [this](CustomPacket& customPacket) {
 		std::cout << "Register succes" << std::endl;
 		SCENE.ChangeScene(new MatchMackingScene());
 		});
@@ -81,35 +81,7 @@ void PacketManager::Init()
 		});
 
 	EVENT_MANAGER.Subscribe(START_GAME, [this](CustomPacket& customPacket) {
-		std::cout << "Start Game" << std::endl;
-
-		std::string ip, name, guid;
-		int index, myIndex, numPort = -1;
-
-		GAME.Init(SCENE.GetWindow());
-
-		std::optional<sf::IpAddress> localIp = sf::IpAddress::getLocalAddress();
-		int localPort = NETWORK.GetListeningPort();
-
-		customPacket.packet >> myIndex;
-
-		for (int i = 0; i < NUM_PLAYERS; ++i)
-		{
-			customPacket.packet >> ip >> name >> index >> numPort >> guid; 
-
-			std::cout << "Received: IP = " << ip << " | Name = " << name << " | Index = " << index << " | Port = " << numPort << " | Guid " << guid << std::endl;
-
-			std::cout << "Client added: IP = " << ip << ", Port = " << numPort << std::endl;
-		}
-
-		if (myIndex == -1)
-		{
-			std::cout << "You haven't recognized yourself" << std::endl;
-			return;
-		}
-
-		EVENT_MANAGER.Emit(DISCONNECT, customPacket); // Request the server to delete my data
-		NETWORK.DisconnectServer();
+		std::cout << "Start Game" << std::endl;		
 
 		});
 
@@ -118,6 +90,46 @@ void PacketManager::Init()
 
 		
 		});
+
+	EVENT_MANAGER.Subscribe(START_QUEUE, [this](CustomPacket& customPacket) {
+		std::cout << "Start Queue" << std::endl;
+		SendPacketToServer(customPacket);
+		});
+
+	EVENT_MANAGER.Subscribe(START_QUEUE_RESULT, [this](CustomPacket& customPacket) {
+		std::string result;
+		customPacket.packet >> result;
+		
+		std::cout << result << std::endl;
+		});
+
+	EVENT_MANAGER.Subscribe(CANCEL_QUEUE_RESULT, [this](CustomPacket& customPacket) {
+		std::string result;
+		customPacket.packet >> result;
+
+		std::cout << result << std::endl;
+		});
+
+	EVENT_MANAGER.Subscribe(CANCEL_QUEUE, [this](CustomPacket& customPacket) {
+		std::cout << "Cancel Queue" << std::endl;
+		SendPacketToServer(customPacket);
+		});
+
+	EVENT_MANAGER.Subscribe(ASK_MAP, [this](CustomPacket& customPacket) {
+		std::cout << "Ask Map" << std::endl;
+		SendPacketToServer(customPacket);
+		});
+
+	EVENT_MANAGER.Subscribe(RECEIVE_MAP, [this](CustomPacket& customPacket) {
+		std::cout << "Map Received" << std::endl;
+
+		std::string jsonContent;
+		customPacket.packet >> jsonContent;
+
+		GAME.SetJson(jsonContent);
+		SCENE.ChangeScene(new RegisterScene());
+		SCENE.SetLauncherFinished(true);
+		});	
 }
 
 void PacketManager::ProcessReceivedPacket(CustomPacket& customPacket)

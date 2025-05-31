@@ -4,15 +4,11 @@
 
 void main()
 {
-	//NETWORK.Init();
-	SCENE.InitScenes(new GameScene());
-	SCENE.Update();
-
-	
-	/*if (NETWORK.ConnectToServer())
+	NETWORK.Init();
+	if (NETWORK.ConnectToServer())
 	{
 		NETWORK.Start();
-		SCENE.InitScenes(new RegisterScene());
-		
-	}*/
+		SCENE.InitScenes();
+		SCENE.Update();
+	}
 }

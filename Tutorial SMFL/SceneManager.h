@@ -5,7 +5,7 @@
 
 #define SCENE SceneManager::Instance()
 #define WIDTH 800
-#define HEIGHT 400
+#define HEIGHT 500
 
 class SceneManager
 {
@@ -20,6 +20,8 @@ private:
 	sf::RenderWindow* window;
 	sf::Font font;
 
+	bool launcherFinished = false;
+
 public:
 	inline static SceneManager& Instance()
 	{
@@ -27,7 +29,7 @@ public:
 		return manager;
 	}
 
-	void InitScenes(Scene* scene);
+	void InitScenes();
 	void ChangeScene(Scene* scene);
 	
 	void Update();
@@ -35,5 +37,7 @@ public:
 	inline Scene* GetCurrentScene() { return currentScene; }
 	inline sf::RenderWindow& GetWindow() { return *window; }
 	inline const sf::Font& GetFont() const { return font; }
+
+	inline void SetLauncherFinished(bool state) { launcherFinished = state; }
 };
 

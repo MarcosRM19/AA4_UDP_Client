@@ -2,6 +2,7 @@
 #include "PacketManager.h"
 #include "GameManager.h"
 #include <optional>
+#include "EventManager.h"
 
 
 
@@ -31,7 +32,7 @@ void NetworkManager::HandleServerCommunication()
 				{
 					PACKET_MANAGER.ProcessReceivedPacket(customPacket);
 				}
-				else
+				else if(status == sf::Socket::Status::Disconnected)
 				{
 					std::cerr << "The server has disconnected" << std::endl;
 					serverSocket->disconnect();
@@ -43,35 +44,6 @@ void NetworkManager::HandleServerCommunication()
 
 					serverSocket.reset();
 				}
-			}
-		}
-	}
-}
-
-void NetworkManager::HandleP2PCommunication()
-{
-
-	while (true)
-	{
-		NetworkState state;
-
-		{
-			std::lock_guard lock(stateMutex);
-			state = currentState;
-		}
-
-		if (state != NetworkState::CONNECTED_TO_PEERS)
-				break;
-
-		if (socketSelector.wait(sf::seconds(0.1f)))
-		{
-			if (socketSelector.isReady(listener))
-			{
-				HandleNewConnections();
-			}
-			else
-			{
-
 			}
 		}
 	}
@@ -99,7 +71,7 @@ void NetworkManager::Start()
 		{
 			Update();
 		}
-		});
+		});	
 }
 
 void NetworkManager::Update()
@@ -114,10 +86,6 @@ void NetworkManager::Update()
 	switch (state) {
 	case NetworkState::CONNECTED_TO_SERVER:
 		HandleServerCommunication();
-		break;
-	case NetworkState::CONNECTED_TO_PEERS:
-		std::cout << "Update p2p" << std::endl;
-		HandleP2PCommunication();
 		break;
 	default:
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -189,7 +157,6 @@ bool NetworkManager::ConnectToServer()
 
 void NetworkManager::DisconnectServer()
 {
-
 	if (serverSocket)
 	{
 		serverSocket->disconnect();
@@ -204,62 +171,6 @@ void NetworkManager::DisconnectServer()
 	std::cout << "Disconnected from server" << std::endl;
 }
 
-void NetworkManager::HandleNewConnections()
-{
-	std::shared_ptr<sf::TcpSocket> newSocket = std::make_shared<sf::TcpSocket>();
-	if (listener.accept(*newSocket) == sf::Socket::Status::Done)
-	{
-		std::optional<sf::IpAddress> remoteIp = newSocket->getRemoteAddress();
-		unsigned short remotePort = newSocket->getRemotePort();
-
-		if (!remoteIp)
-		{
-			std::cerr << "Failed top get remote IP adress" << std::endl;
-
-		}
-		std::cout << "Incoming connection from: " << *remoteIp << ":" << remotePort << std::endl;
-
-		bool linked = false;
-
-		for (std::shared_ptr<Client>& client : p2pClients)
-		{
-			std::string expectedIp = client->GetNetwork().GetIp();
-			int expectedPort = client->GetNetwork().GetPort();
-
-			if (remoteIp->toString() == expectedIp && remotePort == expectedPort)
-			{
-				std::cout << " Link connection with existing client: " << expectedIp << ":" << expectedPort << std::endl;
-
-				sf::TcpSocket& oldSocket = client->GetNetwork().GetSocket();
-
-				{
-					std::lock_guard<std::mutex> selectorLock(selectorMutex);
-					socketSelector.remove(oldSocket); // Quita socket viejo
-				}
-				oldSocket.disconnect(); // Cierra el viejo
-
-				client->GetNetwork().SetSocket(newSocket); // Asigna el nuevo
-				newSocket->setBlocking(false);
-
-				{
-					std::lock_guard<std::mutex> selectorLock(selectorMutex);
-					socketSelector.add(*newSocket); // Añade el nuevo
-				}
-
-				linked = true;
-				break;
-			}
-		}
-
-		if (!linked)
-		{
-			std::cerr << " Unrecognized connection attempt from: " << *remoteIp << ":" << remotePort << std::endl;
-			newSocket->disconnect();
-		}
-	}
-}
-
-
 void NetworkManager::RefreshSelector()
 {
 	std::lock_guard lock(selectorMutex);
@@ -268,13 +179,6 @@ void NetworkManager::RefreshSelector()
 	if (currentState == NetworkState::CONNECTED_TO_SERVER)
 	{
 		socketSelector.add(*serverSocket);
-	}
-	else if (currentState == NetworkState::CONNECTED_TO_PEERS)
-	{
-		for (std::shared_ptr<Client> client : p2pClients)
-			socketSelector.add(client->GetNetwork().GetSocket());
-
-		socketSelector.add(listener);
 	}
 }
 
