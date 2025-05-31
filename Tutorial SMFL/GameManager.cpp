@@ -43,10 +43,26 @@ void GameManager::InitMap()
     tileHeight = ExtractInt(json, "\"tileheight\"");
 
     tileData = ExtractTileData(json);
+
+    for (int row = 0; row < height; ++row) {
+        for (int col = 0; col < width; ++col) {
+            int index = row * width + col;
+            if (tileData[index] > 0) {
+                sf::FloatRect rect(
+                    { static_cast<float>(col * tileWidth), static_cast<float>(row * tileHeight) },
+                    { static_cast<float>(tileWidth), static_cast<float>(tileHeight) }
+                );
+                collisionRects.push_back(rect);
+            }
+        }
+    }
 }
 
 void GameManager::Init(sf::RenderWindow& _window)
 {
+    spawnPositions.push_back({ _window.getSize().x / 3.f, _window.getSize().y / 3.f});
+    spawnPositions.push_back({ _window.getSize().x * 2.f / 3.f, _window.getSize().y / 3.f});
+
     InitMap();
 
     //Si no existe el tileset devuelve un error
@@ -56,9 +72,8 @@ void GameManager::Init(sf::RenderWindow& _window)
     }
 }
 
-void GameManager::Update(sf::RenderWindow& window, const sf::Event& event)
+void GameManager::Render(sf::RenderWindow& window)
 {
-    window.clear();
     int tileRows = tileset.getSize().x / tileWidth;
     for (int row = 0; row < height; ++row) {
         for (int col = 0; col < width; ++col) {
@@ -78,8 +93,6 @@ void GameManager::Update(sf::RenderWindow& window, const sf::Event& event)
             window.draw(tile);
         }
     }
-
-    window.display();
 }
 
 void GameManager::HandleEvent(const sf::Event& event, sf::RenderWindow& window)
@@ -90,4 +103,13 @@ void GameManager::HandleEvent(const sf::Event& event, sf::RenderWindow& window)
         CustomTCPPacket customPacket(DISCONNECT);
         EVENT_MANAGER.TCPEmit(DISCONNECT, customPacket);
     }
+}
+
+bool GameManager::CollidesWithMap(const sf::FloatRect& bounds) const {
+    for (const sf::FloatRect& rect : collisionRects) {
+        if (rect.findIntersection(bounds).has_value()) {
+            return true;
+        }
+    }
+    return false;
 }

@@ -9,7 +9,6 @@ protected:
     std::string inputText;
     const std::size_t maxLengthName = 12;
     const std::size_t maxLengthPasword = 12;
-    const std::size_t idMax = 5;
 
 public:
     Scene();  
@@ -19,8 +18,9 @@ public:
 
     virtual void Enter(sf::RenderWindow& window) = 0;
     virtual void Exit() = 0;
-    virtual void Update(sf::RenderWindow& window, const sf::Event& event) = 0;
-    virtual void HandleEvent(sf::RenderWindow& window, const sf::Event& event);
+    virtual void Update() = 0;
+    virtual void Render(sf::RenderWindow& window) = 0;
+    virtual void HandleEvent(const sf::Event& event);
     virtual void DetectRectangle(sf::Vector2f mousePosition) = 0;
 
 };

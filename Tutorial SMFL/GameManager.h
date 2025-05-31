@@ -20,6 +20,9 @@ private:
     int tileHeight;
     sf::Texture tileset;
     std::vector<int> tileData;
+    std::vector<sf::FloatRect> collisionRects;
+
+    std::vector<sf::Vector2f> spawnPositions;
 
     GameManager() = default;
     GameManager(const GameManager&) = delete;
@@ -38,10 +41,12 @@ public:
     }
 
     void Init(sf::RenderWindow& _window);
-    void Update(sf::RenderWindow& window, const sf::Event& event);
+    void Render(sf::RenderWindow& window);
+    bool CollidesWithMap(const sf::FloatRect& bounds) const;
 
     void HandleEvent(const sf::Event& event, sf::RenderWindow& window);
 
     inline void SetJson(std::string _json) { json = _json; }
 
+    inline std::vector<sf::Vector2f> GetSpawnPositions() { return spawnPositions; }
 };

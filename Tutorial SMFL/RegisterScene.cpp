@@ -124,10 +124,7 @@ void RegisterScene::Render(sf::RenderWindow& window)
 		window.draw(text);
 	for (sf::Text text : texts)
 		window.draw(text);
-
-	window.display();
 }
-
 
 void RegisterScene::DetectRectangle(sf::Vector2f mousePosition)
 {
@@ -178,10 +175,9 @@ void RegisterScene::Exit()
 	std::cout << "Exit Register Scene" << std::endl;
 }
 
-void RegisterScene::Update(sf::RenderWindow& window, const sf::Event& event)
+void RegisterScene::Update()
 {
-	HandleEvent(window, event);
-	Render(window);
+
 }
 
 

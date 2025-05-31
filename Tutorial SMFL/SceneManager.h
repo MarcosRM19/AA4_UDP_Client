@@ -5,7 +5,7 @@
 
 #define SCENE SceneManager::Instance()
 #define WIDTH 800
-#define HEIGHT 500
+#define HEIGHT 480
 
 class SceneManager
 {

@@ -16,10 +16,10 @@ public:
     MatchMackingScene();
     void Enter(sf::RenderWindow& window) override;
     void Exit() override;
-    void Update(sf::RenderWindow& window, const sf::Event& event) override;
+    void Update() override;
+    void Render(sf::RenderWindow& window) override;
     void DetectRectangle(sf::Vector2f mousePosition) override;
     void CreateButtons(sf::RenderWindow& window);
     void CreateCancelButtons(sf::RenderWindow& window);
-    void Render(sf::RenderWindow& window);
 };
 

@@ -37,7 +37,18 @@ void SceneManager::Update()
 		{
 			while (const std::optional event = window->pollEvent())
 			{
-				currentScene->Update(*window, *event);
+				if (event->is<sf::Event::Closed>())
+				{
+					window->close();
+					CustomTCPPacket customPacket(DISCONNECT);
+					EVENT_MANAGER.TCPEmit(DISCONNECT, customPacket);
+				}
+				else
+					currentScene->HandleEvent(*event);
+				
+				currentScene->Update();
+				currentScene->Render(*window);
+				window->display();
 			}
 		}
 	}

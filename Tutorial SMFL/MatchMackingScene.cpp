@@ -22,10 +22,33 @@ void MatchMackingScene::Exit()
 	std::cout << "Exit MatchMaking Scene" << std::endl;
 }
 
-void MatchMackingScene::Update(sf::RenderWindow& window, const sf::Event& event)
+void MatchMackingScene::Update()
 {
-	HandleEvent(window, event);
-	Render(window);
+
+}
+
+void MatchMackingScene::Render(sf::RenderWindow& window)
+{
+	sf::Color brown(238, 208, 157);
+
+	window.clear(brown);
+
+	if (searchingGame)
+	{
+		for (sf::RectangleShape buton : cancelButtons)
+			window.draw(buton);
+		for (sf::Text text : cancelButtonsTexts)
+			window.draw(text);
+	}
+	else
+	{
+		for (sf::RectangleShape buton : buttons)
+			window.draw(buton);
+		for (sf::Text text : buttonsTexts)
+			window.draw(text);
+	}
+
+	window.display();
 }
 
 void MatchMackingScene::DetectRectangle(sf::Vector2f mousePosition)
@@ -107,28 +130,4 @@ void MatchMackingScene::CreateCancelButtons(sf::RenderWindow& window)
 	));
 
 	cancelButtonsTexts[0].setPosition(position);
-}
-
-void MatchMackingScene::Render(sf::RenderWindow& window)
-{
-	sf::Color brown(238, 208, 157);
-
-	window.clear(brown);
-
-	if (searchingGame)
-	{
-		for (sf::RectangleShape buton : cancelButtons)
-			window.draw(buton);
-		for (sf::Text text : cancelButtonsTexts)
-			window.draw(text);
-	}
-	else
-	{
-		for (sf::RectangleShape buton : buttons)
-			window.draw(buton);
-		for (sf::Text text : buttonsTexts)
-			window.draw(text);
-	}
-
-	window.display();
 }

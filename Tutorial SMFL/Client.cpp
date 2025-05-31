@@ -7,7 +7,7 @@
 #include "GameManager.h"
 #include <iostream>
 
-Client::Client(const NetworkClient& network, const PlayerData& player)
+Client::Client(const NetworkClient& network, const Player& player)
 	: networkClient(network), playerData(player) {}
 
 void Client::Update(sf::RenderWindow& window)

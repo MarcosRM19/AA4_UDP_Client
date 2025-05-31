@@ -1,0 +1,52 @@
+#pragma once
+#include "Bullet.h"
+
+class Player
+{
+private:
+    sf::Vector2f position;
+    sf::Vector2f velocity;
+
+    float moveSpeed;
+    float jumpForce;
+    float gravity;
+    bool isOnGround;
+
+    std::vector<std::shared_ptr<Bullet>> bullets;
+    float shootCooldown;
+    float shootTimer;
+
+    bool movingLeft;
+    bool movingRight;
+    bool jumpRequested;
+    bool shootRequested;
+
+    bool facingRight;
+
+    sf::RectangleShape shape;
+
+    void Shoot();
+
+public:
+    Player(sf::Vector2f startPosition, sf::Color color);
+
+    void HandleEvent(const sf::Event& event);
+    void PrepareMovement(float deltaTime);
+    void ApplyMovement(float deltaTime);
+    void Update(float deltaTime);
+    void Render(sf::RenderWindow& window);
+
+    inline void MoveHorizontally(float moveX) { position.x += moveX; shape.setPosition(position); }
+    inline void MoveVertically(float moveY) { position.y += moveY; shape.setPosition(position); }
+
+    sf::FloatRect GetNextBounds(float deltaTime) const;
+    inline sf::Vector2f GetVelocity() { return velocity; }
+    inline sf::Vector2f GetPosition() const { return position; }
+    inline sf::Vector2f GetVelocity() const { return velocity; }
+    inline sf::Vector2f GetSize() const { return shape.getSize(); }
+    inline const std::vector<std::shared_ptr<Bullet>>& GetBullets() const { return bullets; }
+    
+    inline void StopVertical() { velocity.y = 0.f; }
+    inline void SetIsOnGround(bool _isOnGround) { isOnGround = _isOnGround; }
+};
+

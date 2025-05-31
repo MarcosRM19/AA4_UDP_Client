@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="CustomPacket.cpp" />
     <ClCompile Include="CustomUDPPacket.cpp" />
@@ -147,13 +148,14 @@
     <ClCompile Include="NetworkManager.cpp" />
     <ClCompile Include="NetworkThread.cpp" />
     <ClCompile Include="PacketManager.cpp" />
-    <ClCompile Include="PlayerData.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="TimeManager.cpp" />
     <ClCompile Include="RegisterScene.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bullet.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="ClientState.h" />
     <ClInclude Include="CustomPacket.h" />
@@ -168,7 +170,7 @@
     <ClInclude Include="NetworkThread.h" />
     <ClInclude Include="PacketManager.h" />
     <ClInclude Include="PacketType.h" />
-    <ClInclude Include="PlayerData.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="TimeManager.h" />
     <ClInclude Include="RegisterScene.h" />
