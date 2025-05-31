@@ -9,16 +9,16 @@ NetworkClient::NetworkClient(const std::string& ip, int port, const std::string&
 
 void NetworkClient::HandleIncomingPackets()
 {
-    CustomPacket customPacket;
+    CustomTCPPacket customPacket;
 
     sf::Socket::Status status = socket->receive(customPacket.packet);
 
     if (status == sf::Socket::Status::Done) {
         std::cout << "Voy a procesar el paquete" << std::endl;
-        PACKET_MANAGER.ProcessReceivedPacket(customPacket);
+        PACKET_MANAGER.ProcessTCPReceivedPacket(customPacket);
     }
     else if (status == sf::Socket::Status::Disconnected)
     {
-        EVENT_MANAGER.Emit(DISCONNECT, customPacket);
+        EVENT_MANAGER.TCPEmit(DISCONNECT, customPacket);
     }
 }

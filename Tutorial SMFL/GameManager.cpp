@@ -87,7 +87,7 @@ void GameManager::HandleEvent(const sf::Event& event, sf::RenderWindow& window)
     if (event.is<sf::Event::Closed>())
     {
         window.close();
-        CustomPacket customPacket(DISCONNECT);
-        EVENT_MANAGER.Emit(DISCONNECT, customPacket);
+        CustomTCPPacket customPacket(DISCONNECT);
+        EVENT_MANAGER.TCPEmit(DISCONNECT, customPacket);
     }
 }

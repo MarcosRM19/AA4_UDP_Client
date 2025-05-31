@@ -17,8 +17,8 @@ void SceneManager::InitScenes()
 	PACKET_MANAGER.Init();
 	PACKET_MANAGER.SendHandshake(" ");
 
-	CustomPacket customPacket(ASK_MAP);
-	EVENT_MANAGER.Emit(customPacket.type, customPacket);
+	CustomTCPPacket customPacket(ASK_MAP);
+	EVENT_MANAGER.TCPEmit(customPacket.type, customPacket);
 }
 
 void SceneManager::ChangeScene(Scene* scene)
