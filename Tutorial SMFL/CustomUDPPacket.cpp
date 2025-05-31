@@ -4,6 +4,12 @@ CustomUDPPacket::CustomUDPPacket(UdpPacketType udpType, PacketType type)
 {
 	this->type = type;
 	this->udpType = udpType;
+
+	std::memcpy(buffer + bufferSize, &udpType, sizeof(udpType));
+	bufferSize += sizeof(udpType);
+
+	std::memcpy(buffer + bufferSize,&type, sizeof(type));
+	bufferSize += sizeof(type);
 }
 
 void CustomUDPPacket::ReadBuffer(char buffer[1024], size_t _bufferSize)

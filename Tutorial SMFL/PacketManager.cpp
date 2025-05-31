@@ -152,7 +152,18 @@ void PacketManager::Init()
 
 	EVENT_MANAGER.UDPSubscribe(ACK, [this](CustomUDPPacket& customPacket) {
 		std::cout << "Send ACK packet" << std::endl;
-		SendPacketToUDPServer(customPacket);
+
+		CustomUDPPacket _customPacket(UdpPacketType::NORMAL, ACK);
+		std::memcpy(_customPacket.buffer + _customPacket.bufferSize, &customPacket.type, sizeof(customPacket.type));
+		_customPacket.bufferSize += sizeof(customPacket.type);
+
+		int idMessage = 0;
+		std::memcpy(&idMessage, customPacket.buffer, sizeof(idMessage));
+
+		std::memcpy(_customPacket.buffer + _customPacket.bufferSize, &idMessage, sizeof(idMessage));
+		_customPacket.bufferSize += sizeof(idMessage);
+
+		SendPacketToUDPServer(_customPacket);
 		});
 }
 
@@ -167,6 +178,8 @@ void PacketManager::ProcessUDPReceivedPacket(CustomUDPPacket& customPacket)
 {
 	std::cout << customPacket.type << std::endl;
 	EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
+	if (customPacket.udpType == UdpPacketType::CRITIC)
+		EVENT_MANAGER.UDPEmit(ACK, customPacket);
 }
 
 void PacketManager::SendPacketToUDPServer(CustomUDPPacket& responsePacket)
