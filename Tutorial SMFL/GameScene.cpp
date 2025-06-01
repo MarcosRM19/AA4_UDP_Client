@@ -17,8 +17,25 @@ void GameScene::InitPlayers()
 	for (int i = 0; i < spawnPositions.size(); i++)
 	{
 		std::unique_ptr<Player> player = std::make_unique<Player>(spawnPositions[i], playerColors[i]);
-		players.push_back(std::move(player));
+        
+        //este sistema de callback esta hecho con chatgpt
+        player->SetShootCallback([this](const sf::Vector2f& position, const sf::Vector2f& direction) {
+            CreateBullet(position, direction);
+            });
+		
+        players.push_back(std::move(player));
 	}
+}
+
+void GameScene::SetShootCallback(std::function<void(const sf::Vector2f&, const sf::Vector2f&)> callback)
+{
+    shootCallback = callback;  // Guarda la función callback
+}
+
+void GameScene::CreateBullet(const sf::Vector2f& bulletPos, const sf::Vector2f& bulletDir)
+{
+    std::shared_ptr<Bullet> newBullet = std::make_shared<Bullet>(bulletPos, bulletDir);
+    bullets.push_back(newBullet);
 }
 
 void GameScene::Enter(sf::RenderWindow& window)
@@ -73,6 +90,17 @@ void GameScene::Update()
     }
 
     players[0]->Update(deltaTime);
+
+    // Tiene que ser asi por si se borran balas durante el for
+    // Este codigo es de chatgpt
+    for (auto it = bullets.begin(); it != bullets.end(); )
+    {
+        (*it)->Update(deltaTime);
+        if (!(*it)->GetIsActive())
+            it = bullets.erase(it);
+        else
+            ++it;
+    }
 }
 
 void GameScene::Render(sf::RenderWindow& window)
@@ -84,6 +112,11 @@ void GameScene::Render(sf::RenderWindow& window)
 	{
 		player->Render(window);
 	}
+
+    for (const std::shared_ptr<Bullet>& bullet : bullets)
+    {
+        bullet->Render(window);
+    }
 }
 
 void GameScene::HandleEvent(const sf::Event& event)

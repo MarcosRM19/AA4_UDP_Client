@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "GameScene.h"
 #include <iostream>
 
 Player::Player(sf::Vector2f startPosition, sf::Color color)
@@ -26,6 +27,11 @@ Player::Player(sf::Vector2f startPosition, sf::Color color)
     shape.setSize(sf::Vector2f(width, height));
     shape.setFillColor(color);
     shape.setPosition(position);
+}
+
+void Player::SetShootCallback(std::function<void(const sf::Vector2f&, const sf::Vector2f&)> callback)
+{
+    shootCallback = callback;  // Guarda la función que será llamada cuando el jugador dispare
 }
 
 void Player::HandleEvent(const sf::Event& event)
@@ -92,19 +98,6 @@ void Player::Update(float deltaTime)
 {
     if (shootTimer > 0.f)
         shootTimer -= deltaTime;
-
-    // Tiene que ser asi por si se borran balas durante el for
-    // Este codigo es de chatgpt
-    for (auto it = bullets.begin(); it != bullets.end(); )
-    {
-        (*it)->Update(deltaTime);
-        if (!(*it)->GetIsActive())
-            it = bullets.erase(it);
-        else
-            ++it;
-    }
-
-    shape.setPosition(position);
 }
 
 void Player::Shoot()
@@ -113,25 +106,21 @@ void Player::Shoot()
         return;
 
     shootRequested = false;
-
     shootTimer = shootCooldown;
 
     float offsetX = facingRight ? shape.getSize().x : 0.f;
     sf::Vector2f bulletPos = position + sf::Vector2f(offsetX, shape.getSize().y / 2.f);
     sf::Vector2f bulletDir = facingRight ? sf::Vector2f(1.f, 0.f) : sf::Vector2f(-1.f, 0.f);
 
-    std::shared_ptr<Bullet> newBullet = std::make_shared<Bullet>(bulletPos, bulletDir);
-    bullets.push_back(newBullet);
+    if (shootCallback)
+    {
+        shootCallback(bulletPos, bulletDir);  // Notifica a GameScene para crear la bala
+    }
 }
 
 void Player::Render(sf::RenderWindow& window)
 {
     window.draw(shape);
-
-    for (const std::shared_ptr<Bullet>& bullet : bullets)
-    {
-        bullet->Render(window);
-    }
 }
 
 sf::FloatRect Player::GetNextBounds(float deltaTime) const
