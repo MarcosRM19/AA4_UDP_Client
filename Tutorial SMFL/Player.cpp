@@ -140,13 +140,13 @@ void Player::SendPosition()
 {
     if (sendPositionClock.getElapsedTime() >= interval)
     {
-        CustomUDPPacket customPacket(UdpPacketType::NORMAL, SEND_POSITION);
+        CustomUDPPacket customPacket(UdpPacketType::NORMAL, SEND_POSITION, idPlayer);
 
-        customPacket.WriteVariable(id);
+        customPacket.WriteVariable(idMovement);
         customPacket.WriteVariable(position.x);
         customPacket.WriteVariable(position.y);
 
-        std::cout << "Position X: " << position.x << ", Position Y: " << position.y << std::endl;
+        std::cout<< "ID: "<< idMovement << ", Position X: " << position.x << ", Position Y: " << position.y << std::endl;
 
         positionsPackets.push_back(customPacket);
         EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
@@ -159,4 +159,28 @@ sf::FloatRect Player::GetNextBounds(float deltaTime) const
 {
     sf::Vector2f nextPos = position + velocity * deltaTime;
     return sf::FloatRect(nextPos, shape.getSize());
+}
+
+void Player::BacktToValidPosition(int id)
+{
+    for (int i = 0; i < positionsPackets.size(); i++)
+    {
+        int _id = 0;
+        size_t size = positionsPackets[i].payloadOffset;
+        if (positionsPackets[i].ReadVariable(_id, size) == id)
+        {
+            sf::Vector2f position;
+            positionsPackets[i].ReadVariable(position.x, size);
+            positionsPackets[i].ReadVariable(position.y, size);
+
+            //mover al player a la posicion de position
+        }
+    }
+
+    ResetPositionsPackets();
+}
+
+void Player::ResetPositionsPackets()
+{
+    positionsPackets.clear();
 }

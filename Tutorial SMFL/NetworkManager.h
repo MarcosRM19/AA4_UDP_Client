@@ -17,6 +17,8 @@ const sf::IpAddress SERVER_IP = sf::IpAddress(93, 176, 163, 135);
 //const sf::IpAddress SERVER_IP = sf::IpAddress(10,40,1,99);
 //const sf::IpAddress SERVER_IP = sf::IpAddress(192,168,1,71);
 
+const sf::Time interval = sf::seconds(0.5f);
+
 class NetworkManager
 {
 private:
@@ -50,7 +52,9 @@ private:
 
     void HandleServerCommunication();
     void HandleUDPServerCommunication();
+    void HandleCriticCommunication();
 
+    sf::Clock sendCriticPackets;
 public:
 
     inline static NetworkManager& Instance()

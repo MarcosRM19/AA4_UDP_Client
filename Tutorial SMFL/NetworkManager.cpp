@@ -89,6 +89,14 @@ void NetworkManager::HandleUDPServerCommunication()
 	}
 }
 
+void NetworkManager::HandleCriticCommunication()
+{
+	if (sendCriticPackets.getElapsedTime() >= interval)
+	{
+		PACKET_MANAGER.SendCriticsPackets();
+	}
+}
+
 NetworkManager::~NetworkManager()
 {
 	Stop();
@@ -129,6 +137,7 @@ void NetworkManager::Update()
 		break;
 	case NetworkState::CONNECTED_TO_SERVER_UDP:
 		HandleUDPServerCommunication();
+		HandleCriticCommunication();
 	default:
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		break;

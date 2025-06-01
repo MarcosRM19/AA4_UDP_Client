@@ -4,19 +4,11 @@
 
 void main()
 {
-
-	CustomUDPPacket customPacket(UdpPacketType::NORMAL, ACK);
-	int messageInt = 1;
-	customPacket.WriteVariable(messageInt);
-
-	PACKET_MANAGER.SendPacketToUDPServer(customPacket);
-
-
-	/*NETWORK.Init();
+	NETWORK.Init();
 	if (NETWORK.ConnectToServer())
 	{
 		NETWORK.Start();
 		SCENE.InitScenes();
 		SCENE.Update();
-	}*/
+	}
 }

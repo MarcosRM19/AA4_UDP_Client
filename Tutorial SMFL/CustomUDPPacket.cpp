@@ -1,12 +1,16 @@
 #include "CustomUDPPacket.h"
 
-CustomUDPPacket::CustomUDPPacket(UdpPacketType udpType, PacketType type)
+CustomUDPPacket::CustomUDPPacket(UdpPacketType udpType, PacketType type, int playerId)
 {
 	this->type = type;
 	this->udpType = udpType;
+	this->playerId = playerId;
 
 	WriteVariable(udpType);
 	WriteVariable(type);
+	WriteVariable(playerId);
+
+	payloadOffset = bufferSize;
 }
 
 void CustomUDPPacket::ReadBuffer(const char* inputBuffer, size_t _bufferSize)
@@ -19,6 +23,7 @@ void CustomUDPPacket::ReadBuffer(const char* inputBuffer, size_t _bufferSize)
 
 	ReadVariable(udpType, offset);
 	ReadVariable(type, offset);
+	ReadVariable(playerId, offset);
 
 	payloadOffset = offset;
 }

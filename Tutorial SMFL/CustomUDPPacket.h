@@ -7,12 +7,13 @@ class CustomUDPPacket
 {
 public:
     CustomUDPPacket() = default;
-    CustomUDPPacket(UdpPacketType udpType, PacketType type);
+    CustomUDPPacket(UdpPacketType udpType, PacketType type, int PlayerId);
 
     void ReadBuffer(const char* inputBuffer, size_t _bufferSize);
 
     PacketType type;
     UdpPacketType udpType;
+    int playerId;
 
     char buffer[1024];
     size_t bufferSize;

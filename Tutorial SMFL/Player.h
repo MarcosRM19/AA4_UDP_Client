@@ -30,7 +30,9 @@ private:
 
     void Shoot();
 
-    int id = 0;
+    int idMovement = 0;
+    int idCritic = 0;
+    int idPlayer;
     std::vector<CustomUDPPacket> positionsPackets;
     sf::Clock sendPositionClock;
 
@@ -47,6 +49,8 @@ public:
     inline void MoveVertically(float moveY) { position.y += moveY; shape.setPosition(position); }
 
     void SendPosition();
+    void BacktToValidPosition(int id);
+    void ResetPositionsPackets();
 
     sf::FloatRect GetNextBounds(float deltaTime) const;
     inline sf::Vector2f GetVelocity() { return velocity; }
@@ -54,9 +58,12 @@ public:
     inline sf::Vector2f GetVelocity() const { return velocity; }
     inline sf::Vector2f GetSize() const { return shape.getSize(); }
     inline const std::vector<std::shared_ptr<Bullet>>& GetBullets() const { return bullets; }
+    inline const int GetIdPlayer() { return idPlayer; }
     
     inline void StopVertical() { velocity.y = 0.f; }
+    inline void SetColor(sf::Color color) { shape.setFillColor(color); }
     inline void SetIsOnGround(bool _isOnGround) { isOnGround = _isOnGround; }
+    inline void SetId(int id) { idPlayer = id; }
 
 };
 

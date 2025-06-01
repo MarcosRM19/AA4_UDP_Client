@@ -20,5 +20,7 @@ public:
     void CreateTextField(sf::RenderWindow& window, int id);
     void Render(sf::RenderWindow& window) override;
     bool EmptyInformation();
+
+    void SetCurrentPlayer(int id) override;
 };
 

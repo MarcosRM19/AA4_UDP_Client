@@ -21,5 +21,7 @@ public:
     void DetectRectangle(sf::Vector2f mousePosition) override;
     void CreateButtons(sf::RenderWindow& window);
     void CreateCancelButtons(sf::RenderWindow& window);
+
+    void SetCurrentPlayer(int id) override;
 };
 

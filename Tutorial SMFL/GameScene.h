@@ -7,6 +7,8 @@ class GameScene : public Scene
 private:
     std::vector<std::unique_ptr<Player>> players;
 
+    int playerId;
+
     sf::Clock clock;
 
     std::vector<sf::FloatRect> collisionRects;
@@ -26,7 +28,6 @@ public:
     void Render(sf::RenderWindow& window) override;
     void HandleEvent(const sf::Event& event) override;
     void DetectRectangle(sf::Vector2f mousePosition) override;
-
-
+    void SetCurrentPlayer(int id) override;
 };
 
