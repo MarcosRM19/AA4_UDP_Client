@@ -101,7 +101,7 @@ void GameScene::Update()
         {
             if ((*it)->GetBounds().findIntersection(player->GetGlobalBounds()).has_value())
             {
-                // player->ReduceLife(1);
+                player->ReceiveDamage();
 
                 it = bullets.erase(it);
                 bulletDestroyed = true;

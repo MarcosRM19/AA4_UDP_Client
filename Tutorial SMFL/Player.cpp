@@ -1,5 +1,6 @@
 #include "Player.h"
 #include "GameScene.h"
+#include "GameManager.h"
 #include <iostream>
 
 Player::Player(sf::Vector2f startPosition, sf::Color color)
@@ -10,6 +11,10 @@ Player::Player(sf::Vector2f startPosition, sf::Color color)
     jumpForce = 350.f;
     gravity = 500.0f;
     isOnGround = false;
+
+    initialHealth = 5;
+    health = initialHealth;
+    lives = 3;
 
     shootCooldown = 0.5f;
     shootTimer = 0.f;
@@ -53,6 +58,8 @@ void Player::HandleEvent(const sf::Event& event)
             movingLeft = false;
         else if (keyReleased->code == sf::Keyboard::Key::Right)
             movingRight = false;
+        else if (keyPressed->code == sf::Keyboard::Key::Space)
+            shootRequested = false;
     }
 }
 
@@ -105,7 +112,6 @@ void Player::Shoot()
     if (shootTimer > 0.f)
         return;
 
-    shootRequested = false;
     shootTimer = shootCooldown;
 
     float offsetX = facingRight ? shape.getSize().x : 0.f;
@@ -116,6 +122,31 @@ void Player::Shoot()
     {
         shootCallback(bulletPos, bulletDir);  // Notifica a GameScene para crear la bala
     }
+}
+
+void Player::ReceiveDamage()
+{
+    if (health > 1)
+    {
+        health--;
+        return;
+    }
+
+    if (lives > 1)
+    {
+        lives--;
+        health = initialHealth;
+        Respawn();
+        return;
+    }
+
+    std::cout << "YOU LOSE";
+}
+
+void Player::Respawn()
+{
+    position = GAME.GetSpawnPositions()[0];
+    shape.setPosition(position);
 }
 
 void Player::Render(sf::RenderWindow& window)

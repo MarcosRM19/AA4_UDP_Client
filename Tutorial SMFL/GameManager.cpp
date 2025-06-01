@@ -62,6 +62,7 @@ void GameManager::Init(sf::RenderWindow& _window)
 {
     spawnPositions.push_back({ _window.getSize().x / 3.f, _window.getSize().y / 3.f});
     spawnPositions.push_back({ _window.getSize().x * 2.f / 3.f, _window.getSize().y / 3.f});
+    spawnPositions.push_back({ _window.getSize().x / 2.f, _window.getSize().y / 2.f}); //respawn de cuando mueres
 
     InitMap();
 

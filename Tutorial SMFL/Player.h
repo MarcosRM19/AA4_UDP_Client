@@ -11,6 +11,10 @@ private:
     float gravity;
     bool isOnGround;
 
+    float initialHealth;
+    float health;
+    float lives;
+
     float shootCooldown;
     float shootTimer;
 
@@ -25,6 +29,7 @@ private:
 
     std::function<void(const sf::Vector2f&, const sf::Vector2f&)> shootCallback;
     void Shoot();
+    void Respawn();
 
 public:
     Player(sf::Vector2f startPosition, sf::Color color);
@@ -36,6 +41,7 @@ public:
     void ApplyMovement(float deltaTime);
     void Update(float deltaTime);
     void Render(sf::RenderWindow& window);
+    void ReceiveDamage();
 
     inline void MoveHorizontally(float moveX) { position.x += moveX; shape.setPosition(position); }
     inline void MoveVertically(float moveY) { position.y += moveY; shape.setPosition(position); }
