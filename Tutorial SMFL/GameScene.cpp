@@ -91,15 +91,28 @@ void GameScene::Update()
 
     players[0]->Update(deltaTime);
 
-    // Tiene que ser asi por si se borran balas durante el for
-    // Este codigo es de chatgpt
     for (auto it = bullets.begin(); it != bullets.end(); )
     {
         (*it)->Update(deltaTime);
-        if (!(*it)->GetIsActive())
-            it = bullets.erase(it);
-        else
-            ++it;
+
+        bool bulletDestroyed = false;
+
+        for (std::unique_ptr<Player>& player : players)
+        {
+            if ((*it)->GetBounds().findIntersection(player->GetGlobalBounds()).has_value())
+            {
+                // player->ReduceLife(1);
+
+                it = bullets.erase(it);
+                bulletDestroyed = true;
+            }
+        }
+
+        //si se destruye la bala y no hay este if se saltaria una bala
+        if (!bulletDestroyed)
+        {
+            it++;
+        }
     }
 }
 
