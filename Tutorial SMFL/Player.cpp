@@ -146,18 +146,18 @@ void Player::SendPosition()
 {
     if (sendPositionClock.getElapsedTime() >= interval)
     {
-        //CustomUDPPacket customPacket(UdpPacketType::NORMAL, SEND_POSITION, PACKET_MANAGER.GetGlobalId());
+        CustomUDPPacket customPacket(UdpPacketType::NORMAL, SEND_POSITION, PACKET_MANAGER.GetGlobalId());
 
-        //customPacket.WriteVariable(idMovement);
-        //customPacket.WriteVariable(position.x);
-        //customPacket.WriteVariable(position.y);
+        customPacket.WriteVariable(idMovement);
+        customPacket.WriteVariable(position.x);
+        customPacket.WriteVariable(position.y);
 
-        //std::cout<< "ID: "<< idMovement << ", Position X: " << position.x << ", Position Y: " << position.y << std::endl;
+        std::cout<< "ID: "<< idMovement << ", Position X: " << position.x << ", Position Y: " << position.y << std::endl;
 
-        //positionsPackets.push_back(customPacket);
-        //EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
-        //idMovement++;
-        //sendPositionClock.restart();
+        positionsPackets.push_back(customPacket);
+        EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
+        idMovement++;
+        sendPositionClock.restart();
     }
 }
 

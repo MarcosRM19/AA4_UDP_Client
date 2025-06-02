@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <functional>
 
-const sf::Time interval = sf::seconds(0.2f);
+const sf::Time interval = sf::seconds(0.5f);
 
 class Player
 {
