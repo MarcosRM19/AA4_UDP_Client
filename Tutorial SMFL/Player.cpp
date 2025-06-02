@@ -104,6 +104,11 @@ void Player::Update(float deltaTime)
         shootTimer -= deltaTime;
 }
 
+void Player::Render(sf::RenderWindow& window)
+{
+    window.draw(*sprite);
+}
+
 void Player::Shoot()
 {
     if (shootTimer > 0.f)
@@ -167,7 +172,7 @@ void Player::Respawn()
 sf::FloatRect Player::GetNextBounds(float deltaTime) const
 {
     sf::Vector2f nextPos = position + velocity * deltaTime;
-    return sf::FloatRect(nextPos, shape.getSize());
+    return sf::FloatRect(nextPos, GetSize());
 }
 
 void Player::BacktToValidPosition(int id)
@@ -191,6 +196,5 @@ void Player::BacktToValidPosition(int id)
 
 void Player::ResetPositionsPackets()
 {
-    sf::Vector2f nextPos = position + velocity * deltaTime;
-    return sf::FloatRect(nextPos, GetSize());
+    positionsPackets.clear();
 }

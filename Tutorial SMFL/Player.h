@@ -71,10 +71,9 @@ public:
     inline int GetIdCritic() { return idCritic; }
     
     inline void StopVertical() { velocity.y = 0.f; }
-    inline void SetColor(sf::Color color) { shape.setFillColor(color); }
+    inline void SetColor(sf::Color color) { sprite->setColor(color); }
     inline void SetIsOnGround(bool _isOnGround) { isOnGround = _isOnGround; }
     inline void SetId(int id) { idPlayer = id; }
     inline void AddIdCritic() { idCritic++; }
-
 };
 
