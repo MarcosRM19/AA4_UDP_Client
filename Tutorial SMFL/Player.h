@@ -1,5 +1,7 @@
 #pragma once
 #include "CustomUDPPacket.h"
+#include <SFML/Graphics.hpp>
+#include <functional>
 
 const sf::Time interval = sf::seconds(0.2f);
 
@@ -28,7 +30,8 @@ private:
 
     bool facingRight;
 
-    sf::RectangleShape shape;
+    sf::Texture texture;
+    std::shared_ptr<sf::Sprite> sprite;
 
     std::function<void(const sf::Vector2f&, const sf::Vector2f&)> shootCallback;
     void Shoot();
@@ -52,19 +55,18 @@ public:
     void Render(sf::RenderWindow& window);
     void ReceiveDamage();
 
-    inline void MoveHorizontally(float moveX) { position.x += moveX; shape.setPosition(position); }
-    inline void MoveVertically(float moveY) { position.y += moveY; shape.setPosition(position); }
+    inline void MoveHorizontally(float moveX) { position.x += moveX; sprite->setPosition(position); }
+    inline void MoveVertically(float moveY) { position.y += moveY; sprite->setPosition(position); }
 
     void SendPosition();
     void BacktToValidPosition(int id);
     void ResetPositionsPackets();
 
     sf::FloatRect GetNextBounds(float deltaTime) const;
-    inline sf::FloatRect GetGlobalBounds() const { return shape.getGlobalBounds(); }
+    inline sf::FloatRect GetGlobalBounds() const { return sprite->getGlobalBounds(); }
     inline sf::Vector2f GetVelocity() const { return velocity; }
     inline sf::Vector2f GetPosition() const { return position; }
-    inline sf::Vector2f GetVelocity() const { return velocity; }
-    inline sf::Vector2f GetSize() const { return shape.getSize(); }
+    inline sf::Vector2f GetSize() const { return sprite->getLocalBounds().size; }
     inline const int GetIdPlayer() { return idPlayer; }
     inline int GetIdCritic() { return idCritic; }
     

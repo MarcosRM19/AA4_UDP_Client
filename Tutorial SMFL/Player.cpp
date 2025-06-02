@@ -1,13 +1,11 @@
 #include "Player.h"
-#include "GameScene.h"
 #include "GameManager.h"
 #include <iostream>
 #include "EventManager.h"
 
 Player::Player(sf::Vector2f startPosition, sf::Color color)
+    : position(startPosition)
 {
-    position = startPosition;
-
     moveSpeed = 100.f;
     jumpForce = 350.f;
     gravity = 500.0f;
@@ -27,12 +25,10 @@ Player::Player(sf::Vector2f startPosition, sf::Color color)
 
     facingRight = true;
 
-    float width = 25.0f;
-    float height = 50.0f;
-
-    shape.setSize(sf::Vector2f(width, height));
-    shape.setFillColor(color);
-    shape.setPosition(position);
+    if (!texture.loadFromFile("player.png"))
+        std::cerr << "Error loading the texture of the player" << std::endl;
+    sprite = std::make_shared<sf::Sprite>(texture);
+    sprite->setPosition(position);
 }
 
 void Player::SetShootCallback(std::function<void(const sf::Vector2f&, const sf::Vector2f&)> callback)
@@ -99,7 +95,7 @@ void Player::PrepareMovement(float deltaTime)
 void Player::ApplyMovement(float deltaTime)
 {
     position += velocity * deltaTime;
-    shape.setPosition(position);
+    sprite->setPosition(position);
 }
 
 void Player::Update(float deltaTime)
@@ -115,8 +111,8 @@ void Player::Shoot()
 
     shootTimer = shootCooldown;
 
-    float offsetX = facingRight ? shape.getSize().x : 0.f;
-    sf::Vector2f bulletPos = position + sf::Vector2f(offsetX, shape.getSize().y / 2.f);
+    float offsetX = facingRight ? GetSize().x : 0.f;
+    sf::Vector2f bulletPos = position + sf::Vector2f(offsetX, GetSize().y / 2.f);
     sf::Vector2f bulletDir = facingRight ? sf::Vector2f(1.f, 0.f) : sf::Vector2f(-1.f, 0.f);
 
     if (shootCallback)
@@ -166,7 +162,7 @@ void Player::SendPosition()
 void Player::Respawn()
 {
     position = GAME.GetSpawnPositions()[0];
-    shape.setPosition(position);
+    sprite->setPosition(position);
 }
 sf::FloatRect Player::GetNextBounds(float deltaTime) const
 {
@@ -195,5 +191,6 @@ void Player::BacktToValidPosition(int id)
 
 void Player::ResetPositionsPackets()
 {
-    positionsPackets.clear();
+    sf::Vector2f nextPos = position + velocity * deltaTime;
+    return sf::FloatRect(nextPos, GetSize());
 }
