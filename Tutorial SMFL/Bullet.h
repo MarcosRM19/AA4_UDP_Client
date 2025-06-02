@@ -20,4 +20,6 @@ public:
 
     inline bool GetIsActive() const { return isActive; }
     inline sf::FloatRect GetBounds() const { return shape.getGlobalBounds(); }
+
+    inline void SetIsActive(bool _isActive) { isActive = _isActive; }
 };
