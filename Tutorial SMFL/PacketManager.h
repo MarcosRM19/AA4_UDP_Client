@@ -28,7 +28,7 @@ public:
     }
 
     void Init();
-    int GetPacketId(CustomUDPPacket packet);
+    int GetCriticId(CustomUDPPacket packet);
 
     void SendHandshake(const std::string guid);
     void ProcessTCPReceivedPacket(CustomTCPPacket& customPacket);

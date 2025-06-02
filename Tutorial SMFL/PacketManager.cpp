@@ -143,7 +143,7 @@ void PacketManager::Init()
 	EVENT_MANAGER.UDPSubscribe(START_GAME, [this](CustomUDPPacket& customPacket) {
 		SCENE.ChangeScene(new GameScene());
 		
-		customPacket.ReadVariable(idPlayer, customPacket.payloadOffset);
+		idPlayer = customPacket.playerId;
 
 		SCENE.GetCurrentScene()->SetCurrentPlayer(idPlayer);
 		std::cout << "I'm the player with the ID: " << idPlayer << std::endl;
@@ -252,7 +252,7 @@ void PacketManager::Init()
 		});
 }
 
-int PacketManager::GetPacketId(CustomUDPPacket packet)
+int PacketManager::GetCriticId(CustomUDPPacket packet)
 {
 	int idMessage = 0;
 	size_t offset = packet.payloadOffset;
@@ -277,11 +277,11 @@ void PacketManager::ProcessUDPReceivedPacket(CustomUDPPacket& customPacket)
 	case UdpPacketType::URGENT:
 		break;
 	case UdpPacketType::CRITIC:
-		int incomingId = GetPacketId(customPacket);
+		int incomingId = GetCriticId(customPacket);
 
 		auto it = std::find_if(criticsPacketsServer.begin(), criticsPacketsServer.end(),
 			[this, incomingId](const CustomUDPPacket& pkt) {
-				return this->GetPacketId(pkt) == incomingId;
+				return this->GetCriticId(pkt) == incomingId;
 			});
 
 		if (it == criticsPacketsServer.end())
