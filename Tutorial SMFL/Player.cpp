@@ -8,7 +8,7 @@ Player::Player(sf::Vector2f startPosition, sf::Color color)
 {
     moveSpeed = 100.f;
     jumpForce = 350.f;
-    gravity = 500.0f;
+    gravity = 500.f;
     isOnGround = false;
 
     initialHealth = 5;
@@ -25,10 +25,11 @@ Player::Player(sf::Vector2f startPosition, sf::Color color)
 
     facingRight = true;
 
-    if (!texture.loadFromFile("player.png"))
+    if (!texture.loadFromFile("../Assets/Sprites/Duck.png"))
         std::cerr << "Error loading the texture of the player" << std::endl;
     sprite = std::make_shared<sf::Sprite>(texture);
     sprite->setPosition(position);
+    sprite->setScale(sf::Vector2f(0.25f,0.25f));
 }
 
 void Player::SetShootCallback(std::function<void(const sf::Vector2f&, const sf::Vector2f&)> callback)
@@ -55,7 +56,7 @@ void Player::HandleEvent(const sf::Event& event)
             movingLeft = false;
         else if (keyReleased->code == sf::Keyboard::Key::Right)
             movingRight = false;
-        else if (keyPressed->code == sf::Keyboard::Key::Space)
+        else if (keyReleased->code == sf::Keyboard::Key::Space)
             shootRequested = false;
     }
 }
@@ -92,16 +93,12 @@ void Player::PrepareMovement(float deltaTime)
         velocity.y += gravity * deltaTime;
 }
 
-void Player::ApplyMovement(float deltaTime)
-{
-    position += velocity * deltaTime;
-    sprite->setPosition(position);
-}
-
 void Player::Update(float deltaTime)
 {
     if (shootTimer > 0.f)
         shootTimer -= deltaTime;
+
+    sprite->setPosition(position);
 }
 
 void Player::Render(sf::RenderWindow& window)

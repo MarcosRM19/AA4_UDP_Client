@@ -7,7 +7,7 @@
 class GameScene : public Scene
 {
 private:
-    std::vector<std::unique_ptr<Player>> players;
+    std::vector<std::shared_ptr<Player>> players;
     std::vector<std::shared_ptr<Bullet>> bullets;
 
     int playerId;

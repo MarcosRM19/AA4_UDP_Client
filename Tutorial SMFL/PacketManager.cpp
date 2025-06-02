@@ -160,7 +160,7 @@ void PacketManager::Init()
 		SCENE.ChangeScene(new GameScene());
 		
 		SCENE.GetCurrentScene()->SetCurrentPlayer(localIdPlayer);
-		GAME.GetPlayer()->AddIdCritic();
+		GAME.GetReferencePlayer()->AddIdCritic();
 		});
 
 	EVENT_MANAGER.UDPSubscribe(SEND_POSITION, [this](CustomUDPPacket& customPacket) {
@@ -174,12 +174,12 @@ void PacketManager::Init()
 		int returnId = 0;
 		customPacket.ReadVariable(returnId, customPacket.payloadOffset);
 
-		GAME.GetPlayer()->BacktToValidPosition(returnId);
+		GAME.GetReferencePlayer()->BacktToValidPosition(returnId);
 		});
 
 	EVENT_MANAGER.UDPSubscribe(VALIDATION_OK, [this](CustomUDPPacket& customPacket) {
 		std::cout << "All movement are OK" << std::endl;
-		GAME.GetPlayer()->ResetPositionsPackets();
+		GAME.GetReferencePlayer()->ResetPositionsPackets();
 		});
 
 	EVENT_MANAGER.UDPSubscribe(INTERPOLATION_POSITION, [this](CustomUDPPacket& customPacket) {

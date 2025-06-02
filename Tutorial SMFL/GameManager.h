@@ -34,6 +34,7 @@ private:
     void InitMap();
 
     Player* referencePlayer;
+    Player* enemyPlayer;
 
 public:
     inline static GameManager& Instance()
@@ -51,7 +52,9 @@ public:
     inline void SetJson(std::string _json) { json = _json; }
 
     inline std::vector<sf::Vector2f> GetSpawnPositions() { return spawnPositions; }
-    inline Player* GetPlayer() { return referencePlayer; }
+    inline Player* GetReferencePlayer() { return referencePlayer; }
+    inline Player* GetEnemyPlayer() { return enemyPlayer; }
 
     inline void SetReferencePlayer(Player* player) { referencePlayer = player; }
+    inline void SetEnemyPlayer(Player* player) { enemyPlayer = player; }
 };

@@ -41,13 +41,13 @@ void SceneManager::Update()
 				{
 					window->close();
 				}
-				else
-					currentScene->HandleEvent(*event);
-				
-				currentScene->Update();
-				currentScene->Render(*window);
-				window->display();
+
+				currentScene->HandleEvent(*event);
+							
 			}
+			currentScene->Update();
+			currentScene->Render(*window);
+			window->display();
 		}
 	}
 

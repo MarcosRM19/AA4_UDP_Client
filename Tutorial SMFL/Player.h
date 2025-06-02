@@ -50,7 +50,6 @@ public:
 
     void HandleEvent(const sf::Event& event);
     void PrepareMovement(float deltaTime);
-    void ApplyMovement(float deltaTime);
     void Update(float deltaTime);
     void Render(sf::RenderWindow& window);
     void ReceiveDamage();
@@ -66,7 +65,7 @@ public:
     inline sf::FloatRect GetGlobalBounds() const { return sprite->getGlobalBounds(); }
     inline sf::Vector2f GetVelocity() const { return velocity; }
     inline sf::Vector2f GetPosition() const { return position; }
-    inline sf::Vector2f GetSize() const { return sprite->getLocalBounds().size; }
+    inline sf::Vector2f GetSize() const { return sprite->getGlobalBounds().size; }
     inline const int GetIdPlayer() { return idPlayer; }
     inline int GetIdCritic() { return idCritic; }
     

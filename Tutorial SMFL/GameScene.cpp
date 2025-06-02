@@ -14,16 +14,16 @@ void GameScene::InitPlayers()
 
 	std::vector<sf::Color> playerColors = { sf::Color::Blue, sf::Color::Red };
 
-	for (int i = 0; i < spawnPositions.size(); i++)
+	for (int i = 0; i < spawnPositions.size() - 1; i++)
 	{
-		std::unique_ptr<Player> player = std::make_unique<Player>(spawnPositions[i], playerColors[i]);
+		std::shared_ptr<Player> player = std::make_shared<Player>(spawnPositions[i], playerColors[i]);
         
         //este sistema de callback esta hecho con chatgpt
         player->SetShootCallback([this](const sf::Vector2f& position, const sf::Vector2f& direction) {
             CreateBullet(position, direction);
             });
 		
-        players.push_back(std::move(player));
+        players.push_back(player);
 	}
 }
 
@@ -52,43 +52,46 @@ void GameScene::Exit()
 
 void GameScene::Update()
 {
+    if (GAME.GetReferencePlayer() == nullptr)
+        return;
+
 	float deltaTime = clock.restart().asSeconds();
-    GAME.GetPlayer()->PrepareMovement(deltaTime);
+    GAME.GetReferencePlayer()->PrepareMovement(deltaTime);
 
     // Separar los movimientos en X e Y
-    sf::Vector2f originalPos = GAME.GetPlayer()->GetPosition();
+    sf::Vector2f originalPos = GAME.GetReferencePlayer()->GetPosition();
 
     // Intentar mover en X
-    sf::Vector2f horizontalMove = { GAME.GetPlayer()->GetVelocity().x * deltaTime, 0.f };
-    sf::FloatRect nextXBounds = sf::FloatRect(originalPos + horizontalMove, GAME.GetPlayer()->GetSize());
+    sf::Vector2f horizontalMove = { GAME.GetReferencePlayer()->GetVelocity().x * deltaTime, 0.f };
+    sf::FloatRect nextXBounds = sf::FloatRect(originalPos + horizontalMove, GAME.GetReferencePlayer()->GetSize());
 
     if (!GAME.CollidesWithMap(nextXBounds))
     {
-        GAME.GetPlayer()->MoveHorizontally(horizontalMove.x);
+        GAME.GetReferencePlayer()->MoveHorizontally(horizontalMove.x);
     }
 
-    sf::Vector2f verticalMove = { 0.f, GAME.GetPlayer()->GetVelocity().y * deltaTime };
-    sf::FloatRect nextYBounds = sf::FloatRect(GAME.GetPlayer()->GetPosition() + verticalMove, GAME.GetPlayer()->GetSize());
+    sf::Vector2f verticalMove = { 0.f, GAME.GetReferencePlayer()->GetVelocity().y * deltaTime };
+    sf::FloatRect nextYBounds = sf::FloatRect(GAME.GetReferencePlayer()->GetPosition() + verticalMove, GAME.GetReferencePlayer()->GetSize());
 
     if (!GAME.CollidesWithMap(nextYBounds))
     {
-        GAME.GetPlayer()->MoveVertically(verticalMove.y);
-        GAME.GetPlayer()->SetIsOnGround(false);
+        GAME.GetReferencePlayer()->MoveVertically(verticalMove.y);
+        GAME.GetReferencePlayer()->SetIsOnGround(false);
     }
     else
     {
-        if (GAME.GetPlayer()->GetVelocity().y > 0)
+        if (GAME.GetReferencePlayer()->GetVelocity().y > 0)
         {
-            GAME.GetPlayer()->SetIsOnGround(true);
+            GAME.GetReferencePlayer()->SetIsOnGround(true);
         }
-        else if (GAME.GetPlayer()->GetVelocity().y < 0)
+        else if (GAME.GetReferencePlayer()->GetVelocity().y < 0)
         {
-            GAME.GetPlayer()->SetIsOnGround(false);
-            GAME.GetPlayer()->StopVertical();
+            GAME.GetReferencePlayer()->SetIsOnGround(false);
+            GAME.GetReferencePlayer()->StopVertical();
         }
     }
 
-    players[0]->Update(deltaTime);
+    GAME.GetReferencePlayer()->Update(deltaTime);
 
     for (auto it = bullets.begin(); it != bullets.end(); )
     {
@@ -96,7 +99,7 @@ void GameScene::Update()
 
         bool bulletDestroyed = false;
 
-        for (std::unique_ptr<Player>& player : players)
+        for (std::shared_ptr<Player>& player : players)
         {
             if ((*it)->GetBounds().findIntersection(player->GetGlobalBounds()).has_value())
             {
@@ -118,9 +121,12 @@ void GameScene::Update()
 void GameScene::Render(sf::RenderWindow& window)
 {
 	window.clear();
+    if (GAME.GetReferencePlayer() == nullptr)
+        return;
+
 	GAME.Render(window);
 
-	for (std::unique_ptr<Player>& player : players)
+	for (std::shared_ptr<Player>& player : players)
 	{
 		player->Render(window);
 	}
@@ -134,7 +140,7 @@ void GameScene::Render(sf::RenderWindow& window)
 void GameScene::HandleEvent(const sf::Event& event)
 {
 	if (!players.empty())
-		GAME.GetPlayer()->HandleEvent(event);
+		GAME.GetReferencePlayer()->HandleEvent(event);
 }
 
 void GameScene::DetectRectangle(sf::Vector2f mousePosition)
@@ -143,17 +149,22 @@ void GameScene::DetectRectangle(sf::Vector2f mousePosition)
 
 void GameScene::SetCurrentPlayer(int id)
 {
-    GAME.SetReferencePlayer(players[id].get());
-    GAME.GetPlayer()->SetId(id);
+    if (id == 0)
+    {
+        GAME.SetReferencePlayer(players[0].get());
+        GAME.SetEnemyPlayer(players[1].get());
+    }
+    else
+    {
+        GAME.SetReferencePlayer(players[1].get());
+        GAME.SetEnemyPlayer(players[0].get());
+    }
+
+    GAME.GetReferencePlayer()->SetId(id);
     playerId = id;
     std::cout << id << std::endl;
-    for (std::unique_ptr<Player>& player : players)
-    {
-        if (player->GetIdPlayer() == GAME.GetPlayer()->GetIdPlayer())
-            player->SetColor(sf::Color::Blue);
-        else
-            player->SetColor(sf::Color::Red);
-    }
+    GAME.GetReferencePlayer()->SetColor(sf::Color::Blue);
+    GAME.GetEnemyPlayer()->SetColor(sf::Color::Red);
 }
 
 
