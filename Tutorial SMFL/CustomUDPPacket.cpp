@@ -1,44 +1,48 @@
 #include "CustomUDPPacket.h"
+#include <iostream>
 
 CustomUDPPacket::CustomUDPPacket(UdpPacketType udpType, PacketType type, int playerId)
 {
-	this->type = type;
-	this->udpType = udpType;
-	this->playerId = playerId;
+    bufferSize = 0;
+    payloadOffset = 0;
 
-	WriteVariable(udpType);
-	WriteVariable(type);
-	WriteVariable(playerId);
+    this->type = type;
+    this->udpType = udpType;
+    this->playerId = playerId;
 
-	payloadOffset = bufferSize;
+    WriteVariable(static_cast<uint8_t>(udpType));
+    WriteVariable(static_cast<uint8_t>(type));
+    WriteVariable(playerId);
+
+    int _udpType = 0;
+    int _type = 0;
+    size_t a = 0;
+
+    ReadVariable(_udpType, a);
+    ReadVariable(_type, a);
+    std::cout << "El udpType es: " << _udpType << std::endl;
+    std::cout << "El type es: " << _type << std::endl;
+
+    payloadOffset = bufferSize;
 }
 
 void CustomUDPPacket::ReadBuffer(const char* inputBuffer, size_t _bufferSize)
 {
-	size_t offset = 0;
+    size_t offset = 0;
 
-	// Copiamos todo el paquete al buffer interno, incluyendo cabecera y payload
-	std::memcpy(buffer, inputBuffer, _bufferSize);
-	bufferSize = _bufferSize;
+    // Copiamos todo el paquete al buffer interno, incluyendo cabecera y payload
+    std::memcpy(buffer, inputBuffer, _bufferSize);
+    bufferSize = _bufferSize;
 
-	ReadVariable(udpType, offset);
-	ReadVariable(type, offset);
-	ReadVariable(playerId, offset);
+    uint8_t _udpType = 0;
+    uint8_t _type = 0;
 
-	payloadOffset = offset;
-}
+    ReadVariable(_udpType, offset);
+    ReadVariable(_type, offset);
+    ReadVariable(playerId, offset);
 
-bool CustomUDPPacket::WriteString(const std::string& str)
-{
-	uint16_t length = static_cast<uint16_t>(str.size());
-	if (!WriteVariable(length))
-		return false;
+    udpType = static_cast<UdpPacketType>(_udpType);
+    type = static_cast<PacketType>(_type);
 
-	if (bufferSize + length > sizeof(buffer))
-		return false;
-
-	std::memcpy(buffer + bufferSize, str.data(), length);
-	bufferSize += length;
-
-	return true;
+    payloadOffset = offset;
 }

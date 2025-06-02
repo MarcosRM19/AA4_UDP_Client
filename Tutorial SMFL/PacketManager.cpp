@@ -131,27 +131,41 @@ void PacketManager::Init()
 
 		std::string ipString;
 		int port;
+		int enemyId;
 
+		customPacket.packet >> globalIdPlayer;
+		customPacket.packet >> enemyId;
 		customPacket.packet >> ipString;
 		customPacket.packet >> port;
 
 		std::optional<sf::IpAddress> ipAddress = sf::IpAddress::resolve(ipString);
 
 		NETWORK.ConnectToUDPServer(*ipAddress, port);
+
+		if (globalIdPlayer < enemyId)
+			localIdPlayer = 0;
+		else
+			localIdPlayer = 1;
+
+		std::cout << "I'm the player with the ID: " << localIdPlayer << std::endl;
+
+		CustomUDPPacket _customPacket(UdpPacketType::CRITIC, SEND_CLIENT_INFORMATION, globalIdPlayer);
+		_customPacket.WriteVariable(0);
+		criticsPacketsClient.push_back(_customPacket);
+
+		SendPacketToUDPServer(_customPacket);
 		});
 
 	EVENT_MANAGER.UDPSubscribe(START_GAME, [this](CustomUDPPacket& customPacket) {
 		SCENE.ChangeScene(new GameScene());
 		
-		idPlayer = customPacket.playerId;
-
-		SCENE.GetCurrentScene()->SetCurrentPlayer(idPlayer);
-		std::cout << "I'm the player with the ID: " << idPlayer << std::endl;
+		SCENE.GetCurrentScene()->SetCurrentPlayer(localIdPlayer);
+		GAME.GetPlayer()->AddIdCritic();
 		});
 
 	EVENT_MANAGER.UDPSubscribe(SEND_POSITION, [this](CustomUDPPacket& customPacket) {
 		std::cout << "Position Send"<<std::endl;
-		SendPacketToUDPServer(customPacket);
+		//SendPacketToUDPServer(customPacket);
 		});
 
 	EVENT_MANAGER.UDPSubscribe(VALIDATION_BACK, [this](CustomUDPPacket& customPacket) {
@@ -211,7 +225,7 @@ void PacketManager::Init()
 		std::cout << "Send ACK packet" << std::endl;
 
 		//Create UDP Packet 
-		CustomUDPPacket _customPacket(UdpPacketType::NORMAL, RECEIVE_ACK, idPlayer);
+		CustomUDPPacket _customPacket(UdpPacketType::NORMAL, RECEIVE_ACK, globalIdPlayer);
 
 		//Read the ID from the customPacket buffer
 		int idMessage = 0;
@@ -277,6 +291,8 @@ void PacketManager::ProcessUDPReceivedPacket(CustomUDPPacket& customPacket)
 	case UdpPacketType::URGENT:
 		break;
 	case UdpPacketType::CRITIC:
+		//EVENT_MANAGER.UDPEmit(SEND_ACK, customPacket);
+
 		int incomingId = GetCriticId(customPacket);
 
 		auto it = std::find_if(criticsPacketsServer.begin(), criticsPacketsServer.end(),
@@ -291,8 +307,6 @@ void PacketManager::ProcessUDPReceivedPacket(CustomUDPPacket& customPacket)
 		}
 		else
 			std::cout << "Critic Packet processed" << std::endl;
-
-		EVENT_MANAGER.UDPEmit(SEND_ACK, customPacket);
 		break;
 	}
 }
@@ -323,7 +337,7 @@ void PacketManager::SendCriticsPackets()
 {
 	for (int i = 0; i < criticsPacketsClient.size(); i++)
 	{
-		SendPacketToUDPServer(criticsPacketsClient[i]);
+		//SendPacketToUDPServer(criticsPacketsClient[i]);
 	}
 }
 

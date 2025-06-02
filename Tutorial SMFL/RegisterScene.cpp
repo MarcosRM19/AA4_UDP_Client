@@ -170,6 +170,10 @@ bool RegisterScene::EmptyInformation()
 	return false;
 }
 
+void RegisterScene::SetCurrentPlayer(int id)
+{
+}
+
 void RegisterScene::Exit()
 {
 	std::cout << "Exit Register Scene" << std::endl;

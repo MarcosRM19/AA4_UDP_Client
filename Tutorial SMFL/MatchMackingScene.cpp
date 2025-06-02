@@ -50,8 +50,6 @@ void MatchMackingScene::Render(sf::RenderWindow& window)
 				window.draw(text);
 		}
 	}
-
-	window.display();
 }
 
 void MatchMackingScene::DetectRectangle(sf::Vector2f mousePosition)
@@ -136,4 +134,8 @@ void MatchMackingScene::CreateCancelButtons(sf::RenderWindow& window)
 	));
 
 	cancelButtonsTexts[0].setPosition(position);
+}
+
+void MatchMackingScene::SetCurrentPlayer(int id)
+{
 }

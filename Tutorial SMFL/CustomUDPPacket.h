@@ -42,5 +42,6 @@ public:
         return true;
     }
 
-    bool WriteString(const std::string& str);
+    bool WriteString(const std::string& str); 
+    bool ReadString(std::string& outStr, size_t& offset) const;
 };

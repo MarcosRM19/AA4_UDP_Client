@@ -59,11 +59,13 @@ public:
     inline sf::Vector2f GetSize() const { return shape.getSize(); }
     inline const std::vector<std::shared_ptr<Bullet>>& GetBullets() const { return bullets; }
     inline const int GetIdPlayer() { return idPlayer; }
+    inline int GetIdCritic() { return idCritic; }
     
     inline void StopVertical() { velocity.y = 0.f; }
     inline void SetColor(sf::Color color) { shape.setFillColor(color); }
     inline void SetIsOnGround(bool _isOnGround) { isOnGround = _isOnGround; }
     inline void SetId(int id) { idPlayer = id; }
+    inline void AddIdCritic() { idCritic++; }
 
 };
 

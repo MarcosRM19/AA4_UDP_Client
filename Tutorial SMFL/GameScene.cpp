@@ -88,7 +88,7 @@ void GameScene::Render(sf::RenderWindow& window)
 void GameScene::HandleEvent(const sf::Event& event)
 {
 	if (!players.empty())
-		players[0]->HandleEvent(event);
+		GAME.GetPlayer()->HandleEvent(event);
 }
 
 void GameScene::DetectRectangle(sf::Vector2f mousePosition)
@@ -100,7 +100,7 @@ void GameScene::SetCurrentPlayer(int id)
     GAME.SetReferencePlayer(players[id].get());
     GAME.GetPlayer()->SetId(id);
     playerId = id;
-
+    std::cout << id << std::endl;
     for (std::unique_ptr<Player>& player : players)
     {
         if (player->GetIdPlayer() == GAME.GetPlayer()->GetIdPlayer())

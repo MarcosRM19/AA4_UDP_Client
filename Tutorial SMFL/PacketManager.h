@@ -18,7 +18,8 @@ private:
 
     std::vector<CustomUDPPacket> criticsPacketsServer;
     std::vector<CustomUDPPacket> criticsPacketsClient;
-    int idPlayer;
+    int globalIdPlayer;
+    int localIdPlayer;
 
 public:
     inline static PacketManager& Instance()
@@ -40,5 +41,7 @@ public:
     void SendCriticsPackets();
 
     inline void AddCriticalPacketClient(CustomUDPPacket customPacket) { criticsPacketsClient.push_back(customPacket); }
+
+    inline int GetGlobalId() { return globalIdPlayer; }
 };
 

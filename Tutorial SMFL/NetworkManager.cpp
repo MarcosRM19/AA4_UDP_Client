@@ -72,7 +72,6 @@ void NetworkManager::HandleUDPServerCommunication()
 			customPacket.ReadBuffer(udpBuffer, udpReceivedSize);
 
 			PACKET_MANAGER.ProcessUDPReceivedPacket(customPacket);
-			ClearBuffer();
 		}
 		else if (status == sf::Socket::Status::Disconnected)
 		{
@@ -91,7 +90,7 @@ void NetworkManager::HandleUDPServerCommunication()
 
 void NetworkManager::HandleCriticCommunication()
 {
-	if (sendCriticPackets.getElapsedTime() >= interval)
+	if (sendCriticPackets.getElapsedTime() >= intervalCriticPacket)
 	{
 		PACKET_MANAGER.SendCriticsPackets();
 	}
