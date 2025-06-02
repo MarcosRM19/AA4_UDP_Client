@@ -4,7 +4,6 @@
 #include "Client.h"
 
 #define PACKET_MANAGER PacketManager::Instance()
-const int NUM_PLAYERS = 4;
 
 class PacketManager
 {
@@ -17,6 +16,10 @@ private:
 
     void HandleTest(sf::Packet& packet);
 
+    std::vector<CustomUDPPacket> criticsPacketsServer;
+    std::vector<CustomUDPPacket> criticsPacketsClient;
+    int globalIdPlayer;
+    int localIdPlayer;
 
 public:
     inline static PacketManager& Instance()
@@ -26,6 +29,7 @@ public:
     }
 
     void Init();
+    int GetCriticId(CustomUDPPacket packet);
 
     void SendHandshake(const std::string guid);
     void ProcessTCPReceivedPacket(CustomTCPPacket& customPacket);
@@ -33,5 +37,11 @@ public:
 
     void SendPacketToUDPServer(CustomUDPPacket& responsePacket);
     void SendPacketToTCPServer(CustomTCPPacket& responsePacket);
+
+    void SendCriticsPackets();
+
+    inline void AddCriticalPacketClient(CustomUDPPacket customPacket) { criticsPacketsClient.push_back(customPacket); }
+
+    inline int GetGlobalId() { return globalIdPlayer; }
 };
 

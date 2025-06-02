@@ -72,7 +72,6 @@ void NetworkManager::HandleUDPServerCommunication()
 			customPacket.ReadBuffer(udpBuffer, udpReceivedSize);
 
 			PACKET_MANAGER.ProcessUDPReceivedPacket(customPacket);
-			ClearBuffer();
 		}
 		else if (status == sf::Socket::Status::Disconnected)
 		{
@@ -86,6 +85,14 @@ void NetworkManager::HandleUDPServerCommunication()
 
 			udpSocket.reset();
 		}
+	}
+}
+
+void NetworkManager::HandleCriticCommunication()
+{
+	if (sendCriticPackets.getElapsedTime() >= intervalCriticPacket)
+	{
+		PACKET_MANAGER.SendCriticsPackets();
 	}
 }
 
@@ -129,6 +136,7 @@ void NetworkManager::Update()
 		break;
 	case NetworkState::CONNECTED_TO_SERVER_UDP:
 		HandleUDPServerCommunication();
+		HandleCriticCommunication();
 	default:
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		break;

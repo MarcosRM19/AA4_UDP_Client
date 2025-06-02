@@ -1,27 +1,48 @@
 #include "CustomUDPPacket.h"
+#include <iostream>
 
-CustomUDPPacket::CustomUDPPacket(UdpPacketType udpType, PacketType type)
+CustomUDPPacket::CustomUDPPacket(UdpPacketType udpType, PacketType type, int playerId)
 {
-	this->type = type;
-	this->udpType = udpType;
+    bufferSize = 0;
+    payloadOffset = 0;
 
-	std::memcpy(buffer + bufferSize, &udpType, sizeof(udpType));
-	bufferSize += sizeof(udpType);
+    this->type = type;
+    this->udpType = udpType;
+    this->playerId = playerId;
 
-	std::memcpy(buffer + bufferSize,&type, sizeof(type));
-	bufferSize += sizeof(type);
+    WriteVariable(static_cast<uint8_t>(udpType));
+    WriteVariable(static_cast<uint8_t>(type));
+    WriteVariable(playerId);
+
+    int _udpType = 0;
+    int _type = 0;
+    size_t a = 0;
+
+    ReadVariable(_udpType, a);
+    ReadVariable(_type, a);
+    std::cout << "El udpType es: " << _udpType << std::endl;
+    std::cout << "El type es: " << _type << std::endl;
+
+    payloadOffset = bufferSize;
 }
 
-void CustomUDPPacket::ReadBuffer(char buffer[1024], size_t _bufferSize)
+void CustomUDPPacket::ReadBuffer(const char* inputBuffer, size_t _bufferSize)
 {
-	size_t offset = 0;
+    size_t offset = 0;
 
-	std::memcpy(&udpType, buffer + offset, sizeof(udpType));
-	offset += sizeof(udpType);
+    // Copiamos todo el paquete al buffer interno, incluyendo cabecera y payload
+    std::memcpy(buffer, inputBuffer, _bufferSize);
+    bufferSize = _bufferSize;
 
-	std::memcpy(&type, buffer + offset, sizeof(type));
-	offset += sizeof(type);
+    uint8_t _udpType = 0;
+    uint8_t _type = 0;
 
-	std::memcpy(buffer, buffer + offset, _bufferSize - offset);
-	bufferSize = _bufferSize - offset;
+    ReadVariable(_udpType, offset);
+    ReadVariable(_type, offset);
+    ReadVariable(playerId, offset);
+
+    udpType = static_cast<UdpPacketType>(_udpType);
+    type = static_cast<PacketType>(_type);
+
+    payloadOffset = offset;
 }

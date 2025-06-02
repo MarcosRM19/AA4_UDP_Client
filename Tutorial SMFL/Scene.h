@@ -22,5 +22,6 @@ public:
     virtual void Render(sf::RenderWindow& window) = 0;
     virtual void HandleEvent(const sf::Event& event);
     virtual void DetectRectangle(sf::Vector2f mousePosition) = 0;
+    virtual void SetCurrentPlayer(int id) = 0;
 
 };

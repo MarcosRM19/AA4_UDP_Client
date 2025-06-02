@@ -10,6 +10,8 @@ private:
     std::vector<std::unique_ptr<Player>> players;
     std::vector<std::shared_ptr<Bullet>> bullets;
 
+    int playerId;
+
     sf::Clock clock;
 
     std::vector<sf::FloatRect> collisionRects;
@@ -30,8 +32,8 @@ public:
     void Render(sf::RenderWindow& window) override;
     void HandleEvent(const sf::Event& event) override;
     void DetectRectangle(sf::Vector2f mousePosition) override;
-
     void SetShootCallback(std::function<void(const sf::Vector2f&, const sf::Vector2f&)> callback);
     void CreateBullet(const sf::Vector2f& bulletPos, const sf::Vector2f& bulletDir);
+    void SetCurrentPlayer(int id) override;
 };
 

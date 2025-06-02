@@ -2,6 +2,7 @@
 #include "GameScene.h"
 #include "GameManager.h"
 #include <iostream>
+#include "EventManager.h"
 
 Player::Player(sf::Vector2f startPosition, sf::Color color)
 {
@@ -36,7 +37,7 @@ Player::Player(sf::Vector2f startPosition, sf::Color color)
 
 void Player::SetShootCallback(std::function<void(const sf::Vector2f&, const sf::Vector2f&)> callback)
 {
-    shootCallback = callback;  // Guarda la función que será llamada cuando el jugador dispare
+    shootCallback = callback;  // Guarda la funciï¿½n que serï¿½ llamada cuando el jugador dispare
 }
 
 void Player::HandleEvent(const sf::Event& event)
@@ -143,19 +144,56 @@ void Player::ReceiveDamage()
     std::cout << "YOU LOSE";
 }
 
+void Player::SendPosition()
+{
+    if (sendPositionClock.getElapsedTime() >= interval)
+    {
+        //CustomUDPPacket customPacket(UdpPacketType::NORMAL, SEND_POSITION, PACKET_MANAGER.GetGlobalId());
+
+        //customPacket.WriteVariable(idMovement);
+        //customPacket.WriteVariable(position.x);
+        //customPacket.WriteVariable(position.y);
+
+        //std::cout<< "ID: "<< idMovement << ", Position X: " << position.x << ", Position Y: " << position.y << std::endl;
+
+        //positionsPackets.push_back(customPacket);
+        //EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
+        //idMovement++;
+        //sendPositionClock.restart();
+    }
+}
+
 void Player::Respawn()
 {
     position = GAME.GetSpawnPositions()[0];
     shape.setPosition(position);
 }
-
-void Player::Render(sf::RenderWindow& window)
-{
-    window.draw(shape);
-}
-
 sf::FloatRect Player::GetNextBounds(float deltaTime) const
 {
     sf::Vector2f nextPos = position + velocity * deltaTime;
     return sf::FloatRect(nextPos, shape.getSize());
+}
+
+void Player::BacktToValidPosition(int id)
+{
+    for (int i = 0; i < positionsPackets.size(); i++)
+    {
+        int _id = 0;
+        size_t size = positionsPackets[i].payloadOffset;
+        if (positionsPackets[i].ReadVariable(_id, size) == id)
+        {
+            sf::Vector2f position;
+            positionsPackets[i].ReadVariable(position.x, size);
+            positionsPackets[i].ReadVariable(position.y, size);
+
+            //mover al player a la posicion de position
+        }
+    }
+
+    ResetPositionsPackets();
+}
+
+void Player::ResetPositionsPackets()
+{
+    positionsPackets.clear();
 }

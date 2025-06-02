@@ -40,8 +40,6 @@ void SceneManager::Update()
 				if (event->is<sf::Event::Closed>())
 				{
 					window->close();
-					CustomTCPPacket customPacket(DISCONNECT);
-					EVENT_MANAGER.TCPEmit(DISCONNECT, customPacket);
 				}
 				else
 					currentScene->HandleEvent(*event);

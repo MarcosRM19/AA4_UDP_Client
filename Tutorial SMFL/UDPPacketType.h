@@ -1,6 +1,6 @@
 #pragma once
 
-enum class UdpPacketType{NORMAL = 0b00000000, URGENT = 0b00000001, CRITIC = 0b00000010};
+enum class UdpPacketType : uint8_t{NORMAL = 0b00000000, URGENT = 0b00000001, CRITIC = 0b00000010};
 
 
 inline UdpPacketType operator|(UdpPacketType lhs, UdpPacketType rhs) {
