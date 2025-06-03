@@ -30,16 +30,19 @@ Player::Player(sf::Vector2f startPosition, sf::Color color)
         std::cerr << "Error loading the texture of the player" << std::endl;
     sprite = std::make_shared<sf::Sprite>(texture);
     sprite->setPosition(position);
+
+    sprite->setOrigin(sf::Vector2f(GetSize().x / 2, 0));
     scale = 0.25f;
     sprite->setScale({ scale, scale });
 
-    if (!mockeryBuffer.loadFromFile("path_to_your_sound_file.ogg")) {
+    if (!mockeryBuffer.loadFromFile("../Assets/Sounds/Quack.wav")) {
         std::cerr << "Error loading the audio of the player" << std::endl;
     }
 
     mockery = new sf::Sound(mockeryBuffer);
 
     startInterpolate = false;
+    totalTime = 1;
 }
 
 void Player::SetShootCallback(std::function<void(const sf::Vector2f&, const sf::Vector2f&)> callback)
@@ -59,13 +62,16 @@ void Player::HandleEvent(const sf::Event& event)
             jumpRequested = true;
         else if (keyPressed->code == sf::Keyboard::Key::Space)
         {
+            if(!shootRequested)
+                SentCriticPacket(SEND_START_SHOOT);
             shootRequested = true;
-            SentCriticPacket(SEND_START_SHOOT);
         }
         else if (keyPressed->code == sf::Keyboard::Key::E)
         {
+            if(!mockeryRequested)
+                SentCriticPacket(SEND_MOCKERY);
             mockeryRequested = true;
-            SentCriticPacket(SEND_MOCKERY);
+
         }
     }
     else if (const sf::Event::KeyReleased* keyReleased = event.getIf<sf::Event::KeyReleased>())
@@ -76,8 +82,9 @@ void Player::HandleEvent(const sf::Event& event)
             movingRight = false;
         else if (keyReleased->code == sf::Keyboard::Key::Space)
         {
+            if(shootRequested)
+                SentCriticPacket(SEND_STOP_SHOOT);
             shootRequested = false;
-            SentCriticPacket(SEND_STOP_SHOOT);
         }
 
     }
@@ -173,7 +180,6 @@ void Player::Mock()
 {
     mockeryRequested = false;
     mockery->play();
-    SentCriticPacket(SEND_MOCKERY);
 }
 
 void Player::Shoot()
@@ -272,10 +278,10 @@ void Player::SentCriticPacket(PacketType type)
     customPacket.WriteVariable(idCritic);
     idCritic++;
 
-    EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
+    //EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
 }
 
-inline void Player::AddEnemyPosition(sf::Vector2f newPosition, int id)
+void Player::AddEnemyPosition(sf::Vector2f newPosition, int id)
 {
     if (enemyPositions.empty()) //La primera posicion es la posicion inicial 
         enemyPositions.push_back(position);

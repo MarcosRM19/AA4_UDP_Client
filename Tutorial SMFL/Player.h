@@ -4,7 +4,7 @@
 #include <SFML/Audio.hpp>
 #include <functional>
 
-const sf::Time interval = sf::seconds(0.5f);
+const sf::Time interval = sf::seconds(0.25f);
 
 class Player
 {
@@ -77,6 +77,7 @@ public:
     void ResetPositionsPackets();
 
     void SentCriticPacket(PacketType type);
+    void AddEnemyPosition(sf::Vector2f newPosition, int id);
 
     sf::FloatRect GetNextBounds(float deltaTime) const;
     inline sf::FloatRect GetGlobalBounds() const { return sprite->getGlobalBounds(); }
@@ -95,7 +96,6 @@ public:
     inline void SetStartInterpolate(bool state) { startInterpolate = state; }
 
     inline void AddIdCritic() { idCritic++; }
-    inline void AddEnemyPosition(sf::Vector2f newPosition, int id);
     inline void RestartElapsedTime() { elapsedTime.restart(); }
 
     sf::Vector2f Lerp(const sf::Vector2f& start, const sf::Vector2f& end, float t);

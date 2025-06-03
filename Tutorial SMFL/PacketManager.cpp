@@ -186,16 +186,15 @@ void PacketManager::Init()
 		std::cout << "Get enemy position" << std::endl;
 		
 		int id = 0;
-		int positionX = 0;
-		int positionY = 0;
+		sf::Vector2f _position;
 
 		size_t size = customPacket.payloadOffset;
 
 		customPacket.ReadVariable(id, size);
-		customPacket.ReadVariable(positionX, size);
-		customPacket.ReadVariable(positionY, size);
+		customPacket.ReadVariable(_position.x, size);
+		customPacket.ReadVariable(_position.y, size);
 
-		GAME.GetEnemyPlayer()->AddEnemyPosition(sf::Vector2f(positionX, positionY), id);
+		GAME.GetEnemyPlayer()->AddEnemyPosition(_position, id);
 
 		if (customPacket.udpType == UdpPacketType::CRITIC)
 		{
@@ -236,7 +235,7 @@ void PacketManager::Init()
 
 	EVENT_MANAGER.UDPSubscribe(RECEIVE_MOCKERY, [this](CustomUDPPacket& customPacket) {
 		std::cout << "Do Mockery" << std::endl;
-		//Activar que el otro jugador haga la burla
+		GAME.GetEnemyPlayer()->SetMockeryRequested(true);
 		});
 
 	EVENT_MANAGER.UDPSubscribe(SEND_ACK, [this](CustomUDPPacket& customPacket) {
@@ -309,7 +308,7 @@ void PacketManager::ProcessUDPReceivedPacket(CustomUDPPacket& customPacket)
 	case UdpPacketType::URGENT:
 		break;
 	case UdpPacketType::CRITIC:
-		//EVENT_MANAGER.UDPEmit(SEND_ACK, customPacket);
+		EVENT_MANAGER.UDPEmit(SEND_ACK, customPacket);
 
 		int incomingId = GetCriticId(customPacket);
 
@@ -355,7 +354,7 @@ void PacketManager::SendCriticsPackets()
 {
 	for (int i = 0; i < criticsPacketsClient.size(); i++)
 	{
-		//SendPacketToUDPServer(criticsPacketsClient[i]);
+		SendPacketToUDPServer(criticsPacketsClient[i]);
 	}
 }
 
