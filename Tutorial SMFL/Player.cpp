@@ -189,7 +189,7 @@ void Player::Shoot()
 
     shootTimer = shootCooldown;
 
-    float offsetX = facingRight ? GetSize().x : 0.f;
+    float offsetX = facingRight ? GetSize().x : -GetSize().x;
     sf::Vector2f bulletPos = position + sf::Vector2f(offsetX, GetSize().y / 2.f);
     sf::Vector2f bulletDir = facingRight ? sf::Vector2f(1.f, 0.f) : sf::Vector2f(-1.f, 0.f);
 
