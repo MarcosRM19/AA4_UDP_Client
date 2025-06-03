@@ -4,7 +4,17 @@
 #include <SFML/Audio.hpp>
 #include <functional>
 
-const sf::Time interval = sf::seconds(0.25f);
+const sf::Time interval = sf::seconds(0.1f);
+const sf::Time interpolationTime = sf::seconds(0.5f);
+
+struct ValidPackets
+{
+    sf::Vector2f position;
+    int id;
+
+    ValidPackets() = default;
+    ValidPackets(sf::Vector2f position, int id) : position(position), id(id) {};
+};
 
 class Player
 {
@@ -30,8 +40,9 @@ private:
     bool shootRequested;
     bool mockeryRequested;
 
-    std::vector<sf::Vector2f> enemyPositions;
+    std::vector<ValidPackets> enemyPositions;
     sf::Clock elapsedTime;
+    sf::Clock interpolationTimer;
     float totalTime;
     
 
@@ -86,6 +97,7 @@ public:
     inline sf::Vector2f GetSize() const { return sprite->getGlobalBounds().size; }
     inline const int GetIdPlayer() { return idPlayer; }
     inline int GetIdCritic() { return idCritic; }
+    inline std::vector<ValidPackets> GetEnemyPosition() {return enemyPositions; }
     
     inline void StopVertical() { velocity.y = 0.f; }
     inline void SetColor(sf::Color color) { sprite->setColor(color); }

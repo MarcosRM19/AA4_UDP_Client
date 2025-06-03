@@ -164,26 +164,24 @@ void PacketManager::Init()
 		});
 
 	EVENT_MANAGER.UDPSubscribe(SEND_POSITION, [this](CustomUDPPacket& customPacket) {
-		std::cout << "Position Send"<<std::endl;
+		//std::cout << "Position Send"<<std::endl;
 		SendPacketToUDPServer(customPacket);
 		});
 
 	EVENT_MANAGER.UDPSubscribe(VALIDATION_BACK, [this](CustomUDPPacket& customPacket) {
-		std::cout << "Return to a valid Position" << std::endl;
-
 		int returnId = 0;
 		customPacket.ReadVariable(returnId, customPacket.payloadOffset);
-
+		//std::cout << "Return to a valid Position: "<< returnId << std::endl;
 		GAME.GetReferencePlayer()->BacktToValidPosition(returnId);
 		});
 
 	EVENT_MANAGER.UDPSubscribe(VALIDATION_OK, [this](CustomUDPPacket& customPacket) {
-		std::cout << "All movement are OK" << std::endl;
+		//std::cout << "All movement are OK" << std::endl;
 		GAME.GetReferencePlayer()->ResetPositionsPackets();
 		});
 
 	EVENT_MANAGER.UDPSubscribe(INTERPOLATION_POSITION, [this](CustomUDPPacket& customPacket) {
-		std::cout << "Get enemy position" << std::endl;
+		//std::cout << "Get enemy position" << std::endl;
 		
 		int id = 0;
 		sf::Vector2f _position;
@@ -195,13 +193,6 @@ void PacketManager::Init()
 		customPacket.ReadVariable(_position.y, size);
 
 		GAME.GetEnemyPlayer()->AddEnemyPosition(_position, id);
-
-		if (customPacket.udpType == UdpPacketType::CRITIC)
-		{
-			GAME.GetEnemyPlayer()->RestartElapsedTime();
-			GAME.GetEnemyPlayer()->SetStartInterpolate(true);
-		}
-
 		});
 
 	EVENT_MANAGER.UDPSubscribe(SEND_START_SHOOT, [this](CustomUDPPacket& customPacket) {
@@ -332,11 +323,11 @@ void PacketManager::SendPacketToUDPServer(CustomUDPPacket& responsePacket)
 {
 	if (NETWORK.GetUDPSocket()->send(responsePacket.buffer, responsePacket.bufferSize, NETWORK.GetUDPIPAdrres(), NETWORK.GetUDPPort()) == sf::Socket::Status::Done)
 	{
-		std::cout << "Packet send to UDP server" << std::endl;
+		//std::cout << "Packet send to UDP server" << std::endl;
 	}
 	else
 	{
-		std::cout << "Error sending packet to UDP server" << std::endl;
+		//std::cout << "Error sending packet to UDP server" << std::endl;
 	}
 }
 

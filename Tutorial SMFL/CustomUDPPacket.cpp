@@ -20,8 +20,8 @@ CustomUDPPacket::CustomUDPPacket(UdpPacketType udpType, PacketType type, int pla
 
     ReadVariable(_udpType, a);
     ReadVariable(_type, a);
-    std::cout << "El udpType es: " << static_cast<int>(_udpType) << std::endl;
-    std::cout << "El type es: " << static_cast<int>(type) << std::endl;
+   /* std::cout << "El udpType es: " << static_cast<int>(_udpType) << std::endl;
+    std::cout << "El type es: " << static_cast<int>(type) << std::endl;*/
 
     payloadOffset = bufferSize;
 }

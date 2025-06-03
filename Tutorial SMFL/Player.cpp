@@ -133,6 +133,7 @@ void Player::Update(float deltaTime)
         Mock();
 
     sprite->setPosition(position);
+    SendPosition();
 }
 
 void Player::UpdateEnemy(float deltaTime)
@@ -151,16 +152,38 @@ void Player::UpdateEnemy(float deltaTime)
     }
 
     //este codigo es de chatgpt
+    if (interpolationTimer.getElapsedTime() >= interpolationTime)
+    {
+        startInterpolate = true;
+        interpolationTimer.restart(); 
+        elapsedTime.restart();
+    }
+
     if (startInterpolate)
     {
-        float t = elapsedTime.getElapsedTime().asSeconds() / totalTime;
+        if(enemyPositions.empty())
+            return;
 
-        if (t < 1.f / 3.f)
-            sprite->setPosition(Lerp(enemyPositions[0], enemyPositions[1], t * 3));  // Normalizamos t entre 0 y 1 para el primer tramo
-        else if (t < 2.f / 3.f)
-            sprite->setPosition(Lerp(enemyPositions[1], enemyPositions[2], (t - 1.f / 3.f) * 3));  // Normalizamos t entre 0 y 1 para el segundo tramo
-        else
-            sprite->setPosition(Lerp(enemyPositions[2], enemyPositions[3], (t - 2.f / 3.f) * 3));  // Normalizamos t entre 0 y 1 para el tercer tramo
+        std::vector<ValidPackets> validPackets;
+        validPackets.push_back(enemyPositions[0]);
+        for (int i = 1; i < enemyPositions.size(); i++)
+        {
+            if (enemyPositions[i].id < enemyPositions[i - 1].id)
+                continue;
+
+            validPackets.push_back(enemyPositions[i]);
+        }
+
+        float t = elapsedTime.getElapsedTime().asSeconds() / 0.45;
+        float segmentLength = 1.f / (validPackets.size() - 1);
+        size_t segmentIndex = static_cast<size_t>(t / segmentLength);
+
+        if (segmentIndex < validPackets.size() - 1)
+        {
+            float normalizedT = (t - segmentIndex * segmentLength) / segmentLength;
+            sprite->setPosition(Lerp(validPackets[segmentIndex].position, validPackets[segmentIndex + 1].position, normalizedT));
+            position = Lerp(validPackets[segmentIndex].position, validPackets[segmentIndex + 1].position, normalizedT);
+        }
 
         if (t >= 1.f)
         {
@@ -228,7 +251,7 @@ void Player::SendPosition()
         customPacket.WriteVariable(position.x);
         customPacket.WriteVariable(position.y);
 
-        std::cout<< "ID: "<< idMovement << ", Position X: " << position.x << ", Position Y: " << position.y << std::endl;
+        //std::cout<< "ID: "<< idMovement << ", Position X: " << position.x << ", Position Y: " << position.y << std::endl;
 
         positionsPackets.push_back(customPacket);
         EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
@@ -254,12 +277,14 @@ void Player::BacktToValidPosition(int id)
     {
         int _id = 0;
         size_t size = positionsPackets[i].payloadOffset;
-        if (positionsPackets[i].ReadVariable(_id, size) == id)
+        positionsPackets[i].ReadVariable(_id, size);
+     
+        if (_id == id)
         {
             sf::Vector2f _position;
             positionsPackets[i].ReadVariable(_position.x, size);
             positionsPackets[i].ReadVariable(_position.y, size);
-
+            position = _position;
             sprite->setPosition(_position);
         }
     }
@@ -283,25 +308,7 @@ void Player::SentCriticPacket(PacketType type)
 
 void Player::AddEnemyPosition(sf::Vector2f newPosition, int id)
 {
-    if (enemyPositions.empty()) //La primera posicion es la posicion inicial 
-        enemyPositions.push_back(position);
-
-    if (id == 3 && enemyPositions.size() == 1) //Se han perdido los dos paquetes de posicion
-    {
-        sf::Vector2f midpoint1 = (position + newPosition) / 2.f;
-        enemyPositions.push_back(midpoint1);
-
-        sf::Vector2f midpoint2 = (midpoint1 + newPosition) / 2.f;
-        enemyPositions.push_back(midpoint2);
-    }
-    else if (id != enemyPositions.size()) //Se ha perdido uno de los paquetes
-    {
-        sf::Vector2f previousPosition = enemyPositions[id - 1];
-        sf::Vector2f midpoint = (previousPosition + newPosition) / 2.f;
-        enemyPositions.push_back(midpoint);
-    }
-
-    enemyPositions.push_back(newPosition);
+    enemyPositions.push_back({ newPosition, id });          
 }
 
 sf::Vector2f Player::Lerp(const sf::Vector2f& start, const sf::Vector2f& end, float t)
