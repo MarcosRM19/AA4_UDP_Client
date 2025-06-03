@@ -3,11 +3,6 @@
 #include "SceneManager.h"
 #include "EventManager.h"
 
-void GameScene::GenerateColisions()
-{
-
-}
-
 void GameScene::InitPlayers()
 {
 	std::vector<sf::Vector2f> spawnPositions = GAME.GetSpawnPositions();
@@ -29,7 +24,7 @@ void GameScene::InitPlayers()
 
 void GameScene::SetShootCallback(std::function<void(const sf::Vector2f&, const sf::Vector2f&)> callback)
 {
-    shootCallback = callback;  // Guarda la funci�n callback
+    shootCallback = callback;  // Guarda la funcion callback
 }
 
 void GameScene::CreateBullet(const sf::Vector2f& bulletPos, const sf::Vector2f& bulletDir)
@@ -50,12 +45,8 @@ void GameScene::Exit()
 	std::cout << "Exit Game Scene" << std::endl;
 }
 
-void GameScene::Update()
+void GameScene::UpdateReferencePlayer(float deltaTime)
 {
-    if (GAME.GetReferencePlayer() == nullptr)
-        return;
-
-	float deltaTime = clock.restart().asSeconds();
     GAME.GetReferencePlayer()->PrepareMovement(deltaTime);
 
     // Separar los movimientos en X e Y
@@ -92,7 +83,15 @@ void GameScene::Update()
     }
 
     GAME.GetReferencePlayer()->Update(deltaTime);
+}
 
+void GameScene::UpdateEnemyPlayer(float deltaTime)
+{
+    GAME.GetEnemyPlayer()->UpdateEnemy(deltaTime);
+}
+
+void GameScene::UpdateBullets(float deltaTime)
+{
     for (auto it = bullets.begin(); it != bullets.end(); )
     {
         (*it)->Update(deltaTime);
@@ -116,6 +115,18 @@ void GameScene::Update()
             it++;
         }
     }
+}
+
+void GameScene::Update()
+{
+    if (GAME.GetReferencePlayer() == nullptr)
+        return;
+
+	float deltaTime = clock.restart().asSeconds();
+    
+    UpdateReferencePlayer(deltaTime);
+    UpdateEnemyPlayer(deltaTime);
+    UpdateBullets(deltaTime);
 }
 
 void GameScene::Render(sf::RenderWindow& window)

@@ -186,6 +186,11 @@ void PacketManager::Init()
 		std::cout << "Get enemy position" << std::endl;
 		//hacer la interpolación 
 		//Ir guardando en un vector estas posiciones y mover al enemigo
+		/*GAME.GetEnemyPlayer()->AddEnemyPosition();
+		GAME.GetEnemyPlayer()->AddEnemyPosition();
+		GAME.GetEnemyPlayer()->AddEnemyPosition();
+		GAME.GetEnemyPlayer()->AddEnemyPosition();*/
+		GAME.GetEnemyPlayer()->RestartElapsedTime();
 		});
 
 	EVENT_MANAGER.UDPSubscribe(SEND_START_SHOOT, [this](CustomUDPPacket& customPacket) {
@@ -208,12 +213,13 @@ void PacketManager::Init()
 
 	EVENT_MANAGER.UDPSubscribe(RECEIVE_START_SHOOT, [this](CustomUDPPacket& customPacket) {
 		std::cout << "Start Shoot" << std::endl;
-		//Activar que el otro jugador empieza a disparar
+		GAME.GetEnemyPlayer()->SetShootRequested(true);
 		});
 
 	EVENT_MANAGER.UDPSubscribe(RECEIVE_STOP_SHOOT, [this](CustomUDPPacket& customPacket) {
 		std::cout << "Stop Shoot" << std::endl;
 		//Activar que el otro jugador pare de disparar
+		GAME.GetEnemyPlayer()->SetShootRequested(false);
 		});
 
 	EVENT_MANAGER.UDPSubscribe(RECEIVE_MOCKERY, [this](CustomUDPPacket& customPacket) {

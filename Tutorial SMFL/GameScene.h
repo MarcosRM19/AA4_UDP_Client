@@ -20,7 +20,6 @@ private:
     int mapHeight = 15;
     int tileSize = 32;
 
-    void GenerateColisions();
     void InitPlayers();
 
     std::function<void(const sf::Vector2f&, const sf::Vector2f&)> shootCallback;
@@ -28,6 +27,9 @@ private:
 public:
     void Enter(sf::RenderWindow& window) override;
     void Exit() override;
+    void UpdateReferencePlayer(float deltaTime);
+    void UpdateEnemyPlayer(float deltaTime);
+    void UpdateBullets(float deltaTime);
     void Update() override;
     void Render(sf::RenderWindow& window) override;
     void HandleEvent(const sf::Event& event) override;

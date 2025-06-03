@@ -28,13 +28,21 @@ private:
     bool movingRight;
     bool jumpRequested;
     bool shootRequested;
+    bool mockeryRequested;
+
+    std::vector<sf::Vector2f> enemyPositions;
+    sf::Clock elapsedTime;
+    float totalTime;
+    
 
     bool facingRight;
 
     sf::Texture texture;
     std::shared_ptr<sf::Sprite> sprite;
+    float scale;
 
     std::function<void(const sf::Vector2f&, const sf::Vector2f&)> shootCallback;
+    void Mock();
     void Shoot();
     void Respawn();
 
@@ -55,6 +63,7 @@ public:
     void HandleEvent(const sf::Event& event);
     void PrepareMovement(float deltaTime);
     void Update(float deltaTime);
+    void UpdateEnemy(float deltaTime);
     void Render(sf::RenderWindow& window);
     void ReceiveDamage();
 
@@ -78,7 +87,14 @@ public:
     inline void StopVertical() { velocity.y = 0.f; }
     inline void SetColor(sf::Color color) { sprite->setColor(color); }
     inline void SetIsOnGround(bool _isOnGround) { isOnGround = _isOnGround; }
+    inline void SetShootRequested(bool _shootRequested) { shootRequested = _shootRequested; }
+    inline void SetMockeryRequested(bool _mockeryRequested) { mockeryRequested = _mockeryRequested; }
     inline void SetId(int id) { idPlayer = id; }
+
     inline void AddIdCritic() { idCritic++; }
+    inline void AddEnemyPosition(sf::Vector2f newPosition) { enemyPositions.push_back(newPosition); }
+    inline void RestartElapsedTime() { elapsedTime.restart(); }
+
+    sf::Vector2f Lerp(const sf::Vector2f& start, const sf::Vector2f& end, float t);
 };
 

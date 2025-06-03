@@ -22,6 +22,7 @@ Player::Player(sf::Vector2f startPosition, sf::Color color)
     movingRight = false;
     jumpRequested = false;
     shootRequested = false;
+    mockeryRequested = false;
 
     facingRight = true;
 
@@ -29,7 +30,8 @@ Player::Player(sf::Vector2f startPosition, sf::Color color)
         std::cerr << "Error loading the texture of the player" << std::endl;
     sprite = std::make_shared<sf::Sprite>(texture);
     sprite->setPosition(position);
-    sprite->setScale(sf::Vector2f(0.25f,0.25f));
+    scale = 0.25f;
+    sprite->setScale({ scale, scale });
 
     if (!mockeryBuffer.loadFromFile("path_to_your_sound_file.ogg")) {
         std::cerr << "Error loading the audio of the player" << std::endl;
@@ -60,10 +62,9 @@ void Player::HandleEvent(const sf::Event& event)
         }
         else if (keyPressed->code == sf::Keyboard::Key::E)
         {
-            mockery->play();
+            mockeryRequested = true;
             SentCriticPacket(SEND_MOCKERY);
         }
-
     }
     else if (const sf::Event::KeyReleased* keyReleased = event.getIf<sf::Event::KeyReleased>())
     {
@@ -86,12 +87,14 @@ void Player::PrepareMovement(float deltaTime)
 
     if (movingLeft)
     {
+        sprite->setScale({ -1.f * scale, scale });
         velocity.x -= moveSpeed;
         facingRight = false;
     }
 
     if (movingRight)
     {
+        sprite->setScale({ scale, scale });
         velocity.x += moveSpeed;
         facingRight = true;
     }
@@ -117,12 +120,57 @@ void Player::Update(float deltaTime)
     if (shootTimer > 0.f)
         shootTimer -= deltaTime;
 
+    if (mockeryRequested)
+        Mock();
+
     sprite->setPosition(position);
+}
+
+void Player::UpdateEnemy(float deltaTime)
+{
+    if (shootTimer > 0.f)
+        shootTimer -= deltaTime;
+    
+    if (shootRequested)
+    {
+        Shoot();
+    }
+
+    if (mockeryRequested)
+    {
+        Mock();
+    }
+
+    //este codigo es de chatgpt
+    if (enemyPositions.size() > 3)
+    {
+        float t = elapsedTime.getElapsedTime().asSeconds() / totalTime;
+
+        if (t < 1.f / 3.f)
+            sprite->setPosition(Lerp(enemyPositions[0], enemyPositions[1], t * 3));  // Normalizamos t entre 0 y 1 para el primer tramo
+        else if (t < 2.f / 3.f)
+            sprite->setPosition(Lerp(enemyPositions[1], enemyPositions[2], (t - 1.f / 3.f) * 3));  // Normalizamos t entre 0 y 1 para el segundo tramo
+        else
+            sprite->setPosition(Lerp(enemyPositions[2], enemyPositions[3], (t - 2.f / 3.f) * 3));  // Normalizamos t entre 0 y 1 para el tercer tramo
+
+        if (t >= 1.f)
+        {
+            elapsedTime.restart();
+            enemyPositions.clear();
+        }
+    }
 }
 
 void Player::Render(sf::RenderWindow& window)
 {
     window.draw(*sprite);
+}
+
+void Player::Mock()
+{
+    mockeryRequested = false;
+    mockery->play();
+    SentCriticPacket(SEND_MOCKERY);
 }
 
 void Player::Shoot()
@@ -222,4 +270,9 @@ void Player::SentCriticPacket(PacketType type)
     idCritic++;
 
     EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
+}
+
+sf::Vector2f Player::Lerp(const sf::Vector2f& start, const sf::Vector2f& end, float t)
+{
+    return start + (end - start) * t;
 }
