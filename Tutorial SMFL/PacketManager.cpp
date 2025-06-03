@@ -165,7 +165,7 @@ void PacketManager::Init()
 
 	EVENT_MANAGER.UDPSubscribe(SEND_POSITION, [this](CustomUDPPacket& customPacket) {
 		std::cout << "Position Send"<<std::endl;
-		//SendPacketToUDPServer(customPacket);
+		SendPacketToUDPServer(customPacket);
 		});
 
 	EVENT_MANAGER.UDPSubscribe(VALIDATION_BACK, [this](CustomUDPPacket& customPacket) {

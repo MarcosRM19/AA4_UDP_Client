@@ -30,6 +30,12 @@ Player::Player(sf::Vector2f startPosition, sf::Color color)
     sprite = std::make_shared<sf::Sprite>(texture);
     sprite->setPosition(position);
     sprite->setScale(sf::Vector2f(0.25f,0.25f));
+
+    if (!mockeryBuffer.loadFromFile("path_to_your_sound_file.ogg")) {
+        std::cerr << "Error loading the audio of the player" << std::endl;
+    }
+
+    mockery = new sf::Sound(mockeryBuffer);
 }
 
 void Player::SetShootCallback(std::function<void(const sf::Vector2f&, const sf::Vector2f&)> callback)
@@ -48,7 +54,16 @@ void Player::HandleEvent(const sf::Event& event)
         else if (keyPressed->code == sf::Keyboard::Key::Up && isOnGround)
             jumpRequested = true;
         else if (keyPressed->code == sf::Keyboard::Key::Space)
+        {
             shootRequested = true;
+            SentCriticPacket(SEND_START_SHOOT);
+        }
+        else if (keyPressed->code == sf::Keyboard::Key::E)
+        {
+            mockery->play();
+            SentCriticPacket(SEND_MOCKERY);
+        }
+
     }
     else if (const sf::Event::KeyReleased* keyReleased = event.getIf<sf::Event::KeyReleased>())
     {
@@ -57,7 +72,11 @@ void Player::HandleEvent(const sf::Event& event)
         else if (keyReleased->code == sf::Keyboard::Key::Right)
             movingRight = false;
         else if (keyReleased->code == sf::Keyboard::Key::Space)
+        {
             shootRequested = false;
+            SentCriticPacket(SEND_STOP_SHOOT);
+        }
+
     }
 }
 
@@ -163,7 +182,7 @@ void Player::SendPosition()
 
 void Player::Respawn()
 {
-    position = GAME.GetSpawnPositions()[0];
+    position = GAME.GetSpawnPositions()[2];
     sprite->setPosition(position);
 }
 sf::FloatRect Player::GetNextBounds(float deltaTime) const
@@ -180,11 +199,11 @@ void Player::BacktToValidPosition(int id)
         size_t size = positionsPackets[i].payloadOffset;
         if (positionsPackets[i].ReadVariable(_id, size) == id)
         {
-            sf::Vector2f position;
-            positionsPackets[i].ReadVariable(position.x, size);
-            positionsPackets[i].ReadVariable(position.y, size);
+            sf::Vector2f _position;
+            positionsPackets[i].ReadVariable(_position.x, size);
+            positionsPackets[i].ReadVariable(_position.y, size);
 
-            //mover al player a la posicion de position
+            sprite->setPosition(_position);
         }
     }
 
@@ -194,4 +213,13 @@ void Player::BacktToValidPosition(int id)
 void Player::ResetPositionsPackets()
 {
     positionsPackets.clear();
+}
+
+void Player::SentCriticPacket(PacketType type)
+{
+    CustomUDPPacket customPacket(UdpPacketType::CRITIC, type, PACKET_MANAGER.GetGlobalId());
+    customPacket.WriteVariable(idCritic);
+    idCritic++;
+
+    EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
 }

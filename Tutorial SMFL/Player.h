@@ -1,6 +1,7 @@
 #pragma once
 #include "CustomUDPPacket.h"
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <functional>
 
 const sf::Time interval = sf::seconds(0.5f);
@@ -43,6 +44,9 @@ private:
     std::vector<CustomUDPPacket> positionsPackets;
     sf::Clock sendPositionClock;
 
+    sf::Sound* mockery;
+    sf::SoundBuffer mockeryBuffer;
+
 public:
     Player(sf::Vector2f startPosition, sf::Color color);
 
@@ -60,6 +64,8 @@ public:
     void SendPosition();
     void BacktToValidPosition(int id);
     void ResetPositionsPackets();
+
+    void SentCriticPacket(PacketType type);
 
     sf::FloatRect GetNextBounds(float deltaTime) const;
     inline sf::FloatRect GetGlobalBounds() const { return sprite->getGlobalBounds(); }
