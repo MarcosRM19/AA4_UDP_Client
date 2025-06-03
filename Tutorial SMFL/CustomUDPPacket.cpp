@@ -14,14 +14,14 @@ CustomUDPPacket::CustomUDPPacket(UdpPacketType udpType, PacketType type, int pla
     WriteVariable(static_cast<uint8_t>(type));
     WriteVariable(playerId);
 
-    int _udpType = 0;
-    int _type = 0;
+    uint8_t _udpType = 0;
+    uint8_t _type = 0;
     size_t a = 0;
 
     ReadVariable(_udpType, a);
     ReadVariable(_type, a);
-    std::cout << "El udpType es: " << _udpType << std::endl;
-    std::cout << "El type es: " << _type << std::endl;
+    std::cout << "El udpType es: " << static_cast<int>(_udpType) << std::endl;
+    std::cout << "El type es: " << static_cast<int>(type) << std::endl;
 
     payloadOffset = bufferSize;
 }

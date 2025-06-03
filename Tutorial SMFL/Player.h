@@ -1,9 +1,10 @@
 #pragma once
 #include "CustomUDPPacket.h"
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <functional>
 
-const sf::Time interval = sf::seconds(0.2f);
+const sf::Time interval = sf::seconds(0.25f);
 
 class Player
 {
@@ -27,13 +28,21 @@ private:
     bool movingRight;
     bool jumpRequested;
     bool shootRequested;
+    bool mockeryRequested;
+
+    std::vector<sf::Vector2f> enemyPositions;
+    sf::Clock elapsedTime;
+    float totalTime;
+    
 
     bool facingRight;
 
     sf::Texture texture;
     std::shared_ptr<sf::Sprite> sprite;
+    float scale;
 
     std::function<void(const sf::Vector2f&, const sf::Vector2f&)> shootCallback;
+    void Mock();
     void Shoot();
     void Respawn();
 
@@ -43,6 +52,11 @@ private:
     std::vector<CustomUDPPacket> positionsPackets;
     sf::Clock sendPositionClock;
 
+    sf::Sound* mockery;
+    sf::SoundBuffer mockeryBuffer;
+
+    bool startInterpolate;
+
 public:
     Player(sf::Vector2f startPosition, sf::Color color);
 
@@ -51,6 +65,7 @@ public:
     void HandleEvent(const sf::Event& event);
     void PrepareMovement(float deltaTime);
     void Update(float deltaTime);
+    void UpdateEnemy(float deltaTime);
     void Render(sf::RenderWindow& window);
     void ReceiveDamage();
 
@@ -60,6 +75,9 @@ public:
     void SendPosition();
     void BacktToValidPosition(int id);
     void ResetPositionsPackets();
+
+    void SentCriticPacket(PacketType type);
+    void AddEnemyPosition(sf::Vector2f newPosition, int id);
 
     sf::FloatRect GetNextBounds(float deltaTime) const;
     inline sf::FloatRect GetGlobalBounds() const { return sprite->getGlobalBounds(); }
@@ -72,7 +90,14 @@ public:
     inline void StopVertical() { velocity.y = 0.f; }
     inline void SetColor(sf::Color color) { sprite->setColor(color); }
     inline void SetIsOnGround(bool _isOnGround) { isOnGround = _isOnGround; }
+    inline void SetShootRequested(bool _shootRequested) { shootRequested = _shootRequested; }
+    inline void SetMockeryRequested(bool _mockeryRequested) { mockeryRequested = _mockeryRequested; }
     inline void SetId(int id) { idPlayer = id; }
+    inline void SetStartInterpolate(bool state) { startInterpolate = state; }
+
     inline void AddIdCritic() { idCritic++; }
+    inline void RestartElapsedTime() { elapsedTime.restart(); }
+
+    sf::Vector2f Lerp(const sf::Vector2f& start, const sf::Vector2f& end, float t);
 };
 

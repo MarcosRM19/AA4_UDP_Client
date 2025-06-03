@@ -165,7 +165,7 @@ void PacketManager::Init()
 
 	EVENT_MANAGER.UDPSubscribe(SEND_POSITION, [this](CustomUDPPacket& customPacket) {
 		std::cout << "Position Send"<<std::endl;
-		//SendPacketToUDPServer(customPacket);
+		SendPacketToUDPServer(customPacket);
 		});
 
 	EVENT_MANAGER.UDPSubscribe(VALIDATION_BACK, [this](CustomUDPPacket& customPacket) {
@@ -184,8 +184,24 @@ void PacketManager::Init()
 
 	EVENT_MANAGER.UDPSubscribe(INTERPOLATION_POSITION, [this](CustomUDPPacket& customPacket) {
 		std::cout << "Get enemy position" << std::endl;
-		//hacer la interpolación 
-		//Ir guardando en un vector estas posiciones y mover al enemigo
+		
+		int id = 0;
+		sf::Vector2f _position;
+
+		size_t size = customPacket.payloadOffset;
+
+		customPacket.ReadVariable(id, size);
+		customPacket.ReadVariable(_position.x, size);
+		customPacket.ReadVariable(_position.y, size);
+
+		GAME.GetEnemyPlayer()->AddEnemyPosition(_position, id);
+
+		if (customPacket.udpType == UdpPacketType::CRITIC)
+		{
+			GAME.GetEnemyPlayer()->RestartElapsedTime();
+			GAME.GetEnemyPlayer()->SetStartInterpolate(true);
+		}
+
 		});
 
 	EVENT_MANAGER.UDPSubscribe(SEND_START_SHOOT, [this](CustomUDPPacket& customPacket) {
@@ -208,17 +224,18 @@ void PacketManager::Init()
 
 	EVENT_MANAGER.UDPSubscribe(RECEIVE_START_SHOOT, [this](CustomUDPPacket& customPacket) {
 		std::cout << "Start Shoot" << std::endl;
-		//Activar que el otro jugador empieza a disparar
+		GAME.GetEnemyPlayer()->SetShootRequested(true);
 		});
 
 	EVENT_MANAGER.UDPSubscribe(RECEIVE_STOP_SHOOT, [this](CustomUDPPacket& customPacket) {
 		std::cout << "Stop Shoot" << std::endl;
 		//Activar que el otro jugador pare de disparar
+		GAME.GetEnemyPlayer()->SetShootRequested(false);
 		});
 
 	EVENT_MANAGER.UDPSubscribe(RECEIVE_MOCKERY, [this](CustomUDPPacket& customPacket) {
 		std::cout << "Do Mockery" << std::endl;
-		//Activar que el otro jugador haga la burla
+		GAME.GetEnemyPlayer()->SetMockeryRequested(true);
 		});
 
 	EVENT_MANAGER.UDPSubscribe(SEND_ACK, [this](CustomUDPPacket& customPacket) {
@@ -291,7 +308,7 @@ void PacketManager::ProcessUDPReceivedPacket(CustomUDPPacket& customPacket)
 	case UdpPacketType::URGENT:
 		break;
 	case UdpPacketType::CRITIC:
-		//EVENT_MANAGER.UDPEmit(SEND_ACK, customPacket);
+		EVENT_MANAGER.UDPEmit(SEND_ACK, customPacket);
 
 		int incomingId = GetCriticId(customPacket);
 
@@ -337,7 +354,7 @@ void PacketManager::SendCriticsPackets()
 {
 	for (int i = 0; i < criticsPacketsClient.size(); i++)
 	{
-		//SendPacketToUDPServer(criticsPacketsClient[i]);
+		SendPacketToUDPServer(criticsPacketsClient[i]);
 	}
 }
 
