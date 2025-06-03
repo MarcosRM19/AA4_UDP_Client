@@ -55,6 +55,8 @@ private:
     sf::Sound* mockery;
     sf::SoundBuffer mockeryBuffer;
 
+    bool startInterpolate;
+
 public:
     Player(sf::Vector2f startPosition, sf::Color color);
 
@@ -90,9 +92,10 @@ public:
     inline void SetShootRequested(bool _shootRequested) { shootRequested = _shootRequested; }
     inline void SetMockeryRequested(bool _mockeryRequested) { mockeryRequested = _mockeryRequested; }
     inline void SetId(int id) { idPlayer = id; }
+    inline void SetStartInterpolate(bool state) { startInterpolate = state; }
 
     inline void AddIdCritic() { idCritic++; }
-    inline void AddEnemyPosition(sf::Vector2f newPosition) { enemyPositions.push_back(newPosition); }
+    inline void AddEnemyPosition(sf::Vector2f newPosition, int id);
     inline void RestartElapsedTime() { elapsedTime.restart(); }
 
     sf::Vector2f Lerp(const sf::Vector2f& start, const sf::Vector2f& end, float t);

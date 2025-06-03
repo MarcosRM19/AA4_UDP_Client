@@ -184,13 +184,25 @@ void PacketManager::Init()
 
 	EVENT_MANAGER.UDPSubscribe(INTERPOLATION_POSITION, [this](CustomUDPPacket& customPacket) {
 		std::cout << "Get enemy position" << std::endl;
-		//hacer la interpolación 
-		//Ir guardando en un vector estas posiciones y mover al enemigo
-		/*GAME.GetEnemyPlayer()->AddEnemyPosition();
-		GAME.GetEnemyPlayer()->AddEnemyPosition();
-		GAME.GetEnemyPlayer()->AddEnemyPosition();
-		GAME.GetEnemyPlayer()->AddEnemyPosition();*/
-		GAME.GetEnemyPlayer()->RestartElapsedTime();
+		
+		int id = 0;
+		int positionX = 0;
+		int positionY = 0;
+
+		size_t size = customPacket.payloadOffset;
+
+		customPacket.ReadVariable(id, size);
+		customPacket.ReadVariable(positionX, size);
+		customPacket.ReadVariable(positionY, size);
+
+		GAME.GetEnemyPlayer()->AddEnemyPosition(sf::Vector2f(positionX, positionY), id);
+
+		if (customPacket.udpType == UdpPacketType::CRITIC)
+		{
+			GAME.GetEnemyPlayer()->RestartElapsedTime();
+			GAME.GetEnemyPlayer()->SetStartInterpolate(true);
+		}
+
 		});
 
 	EVENT_MANAGER.UDPSubscribe(SEND_START_SHOOT, [this](CustomUDPPacket& customPacket) {

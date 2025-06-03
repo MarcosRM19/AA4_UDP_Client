@@ -38,6 +38,8 @@ Player::Player(sf::Vector2f startPosition, sf::Color color)
     }
 
     mockery = new sf::Sound(mockeryBuffer);
+
+    startInterpolate = false;
 }
 
 void Player::SetShootCallback(std::function<void(const sf::Vector2f&, const sf::Vector2f&)> callback)
@@ -142,7 +144,7 @@ void Player::UpdateEnemy(float deltaTime)
     }
 
     //este codigo es de chatgpt
-    if (enemyPositions.size() > 3)
+    if (startInterpolate)
     {
         float t = elapsedTime.getElapsedTime().asSeconds() / totalTime;
 
@@ -157,6 +159,7 @@ void Player::UpdateEnemy(float deltaTime)
         {
             elapsedTime.restart();
             enemyPositions.clear();
+            startInterpolate = false;
         }
     }
 }
@@ -270,6 +273,29 @@ void Player::SentCriticPacket(PacketType type)
     idCritic++;
 
     EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
+}
+
+inline void Player::AddEnemyPosition(sf::Vector2f newPosition, int id)
+{
+    if (enemyPositions.empty()) //La primera posicion es la posicion inicial 
+        enemyPositions.push_back(position);
+
+    if (id == 3 && enemyPositions.size() == 1) //Se han perdido los dos paquetes de posicion
+    {
+        sf::Vector2f midpoint1 = (position + newPosition) / 2.f;
+        enemyPositions.push_back(midpoint1);
+
+        sf::Vector2f midpoint2 = (midpoint1 + newPosition) / 2.f;
+        enemyPositions.push_back(midpoint2);
+    }
+    else if (id != enemyPositions.size()) //Se ha perdido uno de los paquetes
+    {
+        sf::Vector2f previousPosition = enemyPositions[id - 1];
+        sf::Vector2f midpoint = (previousPosition + newPosition) / 2.f;
+        enemyPositions.push_back(midpoint);
+    }
+
+    enemyPositions.push_back(newPosition);
 }
 
 sf::Vector2f Player::Lerp(const sf::Vector2f& start, const sf::Vector2f& end, float t)
