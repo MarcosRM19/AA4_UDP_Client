@@ -1,16 +1,14 @@
 #include "SceneManager.h"
 #include "NetworkManager.h"
-
+#include "PacketManager.h"
 
 void main()
 {
-	srand(time(NULL));
 	NETWORK.Init();
-	
 	if (NETWORK.ConnectToServer())
 	{
 		NETWORK.Start();
-		SCENE.InitScenes(new RegisterScene());
+		SCENE.InitScenes();
 		SCENE.Update();
 	}
 }

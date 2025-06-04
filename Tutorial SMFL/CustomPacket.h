@@ -2,12 +2,12 @@
 #include <SFML/Network.hpp>
 #include "PacketType.h"
 
-class CustomPacket
+class CustomTCPPacket
 {
 public:
 
-    CustomPacket() = default;
-    CustomPacket(PacketType type);
+    CustomTCPPacket() = default;
+    CustomTCPPacket(PacketType type);
 
     sf::Packet packet;
     PacketType type;

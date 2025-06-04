@@ -1,9 +1,9 @@
 #pragma once
 #include "CustomPacket.h"
+#include "CustomUDPPacket.h"
 #include "Client.h"
 
 #define PACKET_MANAGER PacketManager::Instance()
-const int NUM_PLAYERS = 4;
 
 class PacketManager
 {
@@ -16,6 +16,11 @@ private:
 
     void HandleTest(sf::Packet& packet);
 
+    std::vector<CustomUDPPacket> criticsPacketsServer;
+    std::vector<CustomUDPPacket> criticsPacketsClient;
+
+    int globalIdPlayer;
+    int localIdPlayer;
 
 public:
     inline static PacketManager& Instance()
@@ -25,11 +30,20 @@ public:
     }
 
     void Init();
+    int GetCriticId(CustomUDPPacket packet);
 
     void SendHandshake(const std::string guid);
-    void ProcessReceivedPacket(CustomPacket& customPacket);
+    void ProcessTCPReceivedPacket(CustomTCPPacket& customPacket);
+    void ProcessUDPReceivedPacket(CustomUDPPacket& customPacket);
 
-    void SendPacketToClient(const std::shared_ptr<Client> client, CustomPacket& responsePacket);
-    void SendPacketToServer(CustomPacket& responsePacket);
+    void SendPacketToUDPServer(CustomUDPPacket& responsePacket);
+    void SendPacketToTCPServer(CustomTCPPacket& responsePacket);
+
+    void SendCriticsPackets();
+    void SendPingPackets();
+
+    inline void AddCriticalPacketClient(CustomUDPPacket customPacket) { criticsPacketsClient.push_back(customPacket); }
+
+    inline int GetGlobalId() { return globalIdPlayer; }
 };
 

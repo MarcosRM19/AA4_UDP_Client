@@ -1,18 +1,36 @@
 #include "EventManager.h"
 #include <iostream>
 
-void EventManager::Subscribe(const PacketType type, Callback _callback)
+void EventManager::TCPSubscribe(const PacketType type, TCPCallback _callback)
 {
-    subscribers[type].push_back(_callback);
+    TCPsubscribers[type].push_back(_callback);
 }
 
-void EventManager::Emit(const PacketType type, CustomPacket customPacket)
+void EventManager::UDPSubscribe(const PacketType type, UDPCallback callback)
+{
+    UDPsubscribers[type].push_back(callback);
+}
+
+void EventManager::TCPEmit(const PacketType type, CustomTCPPacket customPacket)
 {
 
-    std::unordered_map<PacketType, std::vector<Callback>>::iterator it = subscribers.find(type);
+    std::unordered_map<PacketType, std::vector<TCPCallback>>::iterator it = TCPsubscribers.find(type);
 
-    if (it != subscribers.end()) {
-        for (Callback& callback : it->second) {
+    if (it != TCPsubscribers.end()) {
+        for (TCPCallback& callback : it->second) {
+            callback(customPacket);
+        }
+    }
+    else
+        std::cerr << "The event: " << type << " does not exists" << std::endl;
+}
+
+void EventManager::UDPEmit(const PacketType type, CustomUDPPacket customPacket)
+{
+    std::unordered_map<PacketType, std::vector<UDPCallback>>::iterator it = UDPsubscribers.find(type);
+
+    if (it != UDPsubscribers.end()) {
+        for (UDPCallback& callback : it->second) {
             callback(customPacket);
         }
     }

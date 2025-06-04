@@ -11,17 +11,17 @@ Scene::~Scene()
 	delete currentText;
 }
 
-void Scene::HandleEvent(sf::RenderWindow& window, const sf::Event& event)
+void Scene::HandleEvent(const sf::Event& event)
 {
 	if (event.is<sf::Event::Closed>())
-		window.close();
+		SCENE.GetWindow().close();
 
 	if (const sf::Event::MouseButtonPressed* mousePressed = event.getIf<sf::Event::MouseButtonPressed>())
 	{
 		switch (mousePressed->button)
 		{
 		case sf::Mouse::Button::Left:
-			sf::Vector2f mousePososition = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+			sf::Vector2f mousePososition = SCENE.GetWindow().mapPixelToCoords(sf::Mouse::getPosition(SCENE.GetWindow()));
 			DetectRectangle(mousePososition);
 			break;
 		}

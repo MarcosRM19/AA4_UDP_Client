@@ -1,6 +1,6 @@
 #include "CustomPacket.h"
 
-CustomPacket::CustomPacket(PacketType type)
+CustomTCPPacket::CustomTCPPacket(PacketType type)
 {
     this->type = type;
     packet << type;

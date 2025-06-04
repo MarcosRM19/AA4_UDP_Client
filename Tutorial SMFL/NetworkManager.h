@@ -12,10 +12,14 @@
 #define NETWORK NetworkManager::Instance()
 
 const int SERVER_PORT = 55001;
-//const sf::IpAddress SERVER_IP = sf::IpAddress(93, 176, 163, 135);
-const sf::IpAddress SERVER_IP = sf::IpAddress(192, 168, 1, 144);
+const sf::IpAddress SERVER_IP = sf::IpAddress(93, 176, 163, 135);
+//const sf::IpAddress SERVER_IP = sf::IpAddress(192, 168, 1, 144);
 //const sf::IpAddress SERVER_IP = sf::IpAddress(10,40,1,99);
 //const sf::IpAddress SERVER_IP = sf::IpAddress(192,168,1,71);
+
+const sf::Time intervalCriticPacket = sf::seconds(0.5f);
+const sf::Time pingTime = sf::seconds(0.5f);
+const sf::Time pingTimeExtra = sf::seconds(2.f);
 
 class NetworkManager
 {
@@ -31,10 +35,17 @@ private:
     sf::SocketSelector socketSelector;
     sf::TcpListener listener;
 
+    std::shared_ptr<sf::UdpSocket> udpSocket;
+
     std::thread networkThread;
     std::mutex stateMutex;
     std::mutex selectorMutex;
 
+    sf::IpAddress udpServerIP = sf::IpAddress(10, 40, 1, 99);
+    int udpServerPort;
+    char udpBuffer[1024];
+    std::size_t udpReceivedSize;
+    sf::Clock pingClock;
     bool isRunning;
 
     NetworkManager() {};
@@ -42,8 +53,10 @@ private:
     NetworkManager& operator=(const NetworkManager&) = delete;
 
     void HandleServerCommunication();
-    void HandleP2PCommunication();
+    void HandleUDPServerCommunication();
+    void HandleCriticCommunication();
 
+    sf::Clock sendCriticPackets;
 public:
 
     inline static NetworkManager& Instance()
@@ -60,16 +73,15 @@ public:
     void Stop();
 
     void StartListening();
-    void StartClientConnections(const std::vector < std::shared_ptr<Client>>& newClients, int myIndex, int port);
     bool ConnectToServer();
-    void DisconnectServer();
-    void DisconnectAllPeers();
-
-    void HandleNewConnections();
-    void UpdateP2PClients();
+    void DisconnectTCPServer();
+    void DisconnectUDPServer();
+    void ConnectToUDPServer(sf::IpAddress ip, int port);
 
     void ChangeState(NetworkState newState);
     void RefreshSelector();
+
+    void ClearBuffer();
 
     std::shared_ptr<sf::TcpSocket> GetServerSocket() const { return serverSocket; }
     std::vector<std::shared_ptr<Client>>& GetClients() { return p2pClients; }
@@ -79,4 +91,10 @@ public:
     std::shared_ptr<Client> GetClientByGuid(const std::string& guid);
     std::mutex& GetSelectorMutex() { return selectorMutex; }
     sf::SocketSelector& GetSocketSelector() { return socketSelector; }
+    void ResetClock() { pingClock.restart(); }
+
+    inline std::shared_ptr<sf::UdpSocket> GetUDPSocket() const { return udpSocket; }
+    inline int GetUDPPort() const { return udpServerPort; }
+    inline sf::IpAddress GetUDPIPAdrres() const { return udpServerIP; }
+
 };

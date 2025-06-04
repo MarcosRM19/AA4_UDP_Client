@@ -3,18 +3,18 @@
 #include <SFML/Network.hpp>
 #include "ClientState.h"
 #include "NetworkClient.h"
-#include "PlayerData.h"
+#include "Player.h"
 
 class Client
 {
 private:
 
     NetworkClient networkClient;
-    PlayerData playerData;
+    Player playerData;
 
 public:
 
-    Client(const NetworkClient& network, const PlayerData& player);
+    Client(const NetworkClient& network, const Player& player);
 
     void Update(sf::RenderWindow& window);
     void HandleEvent(const sf::Event& event, sf::RenderWindow& window);
@@ -22,7 +22,7 @@ public:
     void HandleIncomingPackets();
 
     NetworkClient& GetNetwork() { return networkClient; }
-    PlayerData& GetPlayerData() { return playerData; }
+    Player& GetPlayerData() { return playerData; }
 
    
 };

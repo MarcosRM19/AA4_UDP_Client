@@ -9,138 +9,22 @@ MatchMackingScene::MatchMackingScene() : Scene()
 
 void MatchMackingScene::Enter(sf::RenderWindow& window)
 {
-	std::cout << "Enter Lobby Scene" << std::endl;
+	std::cout << "Enter MatchMaking Scene" << std::endl;
 
-	CreateTextField(window);
-	for (int i = 0; i < 2; i++)
-	{
-		CreateButtons(window, i);
-	}
+	searchingGame = false;
 
-	currentText = nullptr;
+	CreateCancelButtons(window);
+	CreateButtons(window);
 }
 
 void MatchMackingScene::Exit()
 {
-	std::cout << "Exit Lobby Scene" << std::endl;
+	std::cout << "Exit MatchMaking Scene" << std::endl;
 }
 
-void MatchMackingScene::Update(sf::RenderWindow& window, const sf::Event& event)
+void MatchMackingScene::Update()
 {
-	HandleEvent(window, event);
-	Render(window);
-}
 
-void MatchMackingScene::DetectRectangle(sf::Vector2f mousePosition)
-{
-	if (textBackGround[0].getGlobalBounds().contains(mousePosition)) {
-		inputText = std::string();
-		currentText = &idInformation[1];
-	}
-
-	for (size_t i = 0; i < buttons.size(); ++i) {
-		if (buttons[i].getGlobalBounds().contains(mousePosition)) {
-			currentText = nullptr;
-
-			if (idInformation[1].getString().isEmpty())
-				return;
-
-			if (i == 0)
-			{
-				//Mandar paquete con la información de la ID
-				CustomPacket customPacket(CREATE_ROOM);
-				customPacket.packet << idInformation[1].getString().toAnsiString();
-
-				EVENT_MANAGER.Emit(CREATE_ROOM, customPacket);
-				std::cout << "Create room Send" << std::endl;
-			}
-			else if (i == 1)
-			{
-				CustomPacket customPacket(JOIN_ROOM);
-				customPacket.packet << idInformation[1].getString().toAnsiString();
-
-				EVENT_MANAGER.Emit(JOIN_ROOM, customPacket);
-				std::cout << "Join room Send" << std::endl;
-			}
-		}
-	}
-}
-
-
-void MatchMackingScene::CreateButtons(sf::RenderWindow& window, int id)
-{
-	buttons.push_back(sf::RectangleShape());
-	buttonsTexts.push_back(sf::Text(SCENE.GetFont()));
-
-	sf::Vector2f position(
-		window.getSize().x / 2.f,
-		window.getSize().y / 2.f + 200.f
-	);
-	std::string text;
-
-	if (id == 0)
-	{
-		position.x -= 200;
-		text = "Create Room";
-	}
-	else
-	{
-		position.x += 200;
-		text = "Join Room";
-	}
-
-	buttons[id].setSize({ 300.f, 75.f });
-	buttons[id].setFillColor(sf::Color::Green);
-	buttons[id].setOrigin(buttons[id].getSize() / 2.f);
-	buttons[id].setPosition(position);
-
-	buttonsTexts[id].setString(text);
-	buttonsTexts[id].setFillColor(sf::Color::Black);
-
-	sf::FloatRect textBounds = buttonsTexts[id].getLocalBounds();
-	buttonsTexts[id].setOrigin(sf::Vector2f(
-		textBounds.position.x + textBounds.size.x / 2.f,
-		textBounds.position.y + textBounds.size.y / 2.f
-	));
-
-	buttonsTexts[id].setPosition(position);
-}
-
-void MatchMackingScene::CreateTextField(sf::RenderWindow& window)
-{
-	textBackGround.push_back(sf::RectangleShape());
-	idInformation.push_back(sf::Text(SCENE.GetFont()));
-	idInformation.push_back(sf::Text(SCENE.GetFont()));
-
-	sf::Vector2f position(
-		window.getSize().x / 2.f,
-		window.getSize().y / 2.f - 100.f
-	);
-
-	textBackGround[0].setSize({ 250.f, 50.f });
-	textBackGround[0].setFillColor(sf::Color::White);
-	textBackGround[0].setOrigin(textBackGround[0].getSize() / 2.f);
-	textBackGround[0].setPosition(position);
-
-	idInformation[0].setString("ID");
-	idInformation[0].setFillColor(sf::Color::Black);
-
-	idInformation[1].setFillColor(sf::Color::Black);
-
-	sf::FloatRect textInformationBounds = idInformation[0].getLocalBounds();
-	idInformation[0].setOrigin(sf::Vector2f(
-		textInformationBounds.position.x + textInformationBounds.size.x / 2.f,
-		textInformationBounds.position.y + textInformationBounds.size.y / 2.f + 45
-	));
-
-	sf::FloatRect textBounds = idInformation[1].getLocalBounds();
-	idInformation[1].setOrigin(sf::Vector2f(
-		textBounds.position.x + textBounds.size.x / 2.f + 115,
-		textBounds.position.y + textBounds.size.y / 2.f + 20
-	));
-
-	idInformation[1].setPosition(position);
-	idInformation[0].setPosition(position);
 }
 
 void MatchMackingScene::Render(sf::RenderWindow& window)
@@ -149,14 +33,109 @@ void MatchMackingScene::Render(sf::RenderWindow& window)
 
 	window.clear(brown);
 
-	for (sf::RectangleShape buton : buttons)
-		window.draw(buton);
-	for (sf::RectangleShape buton : textBackGround)
-		window.draw(buton);
-	for (sf::Text text : buttonsTexts)
-		window.draw(text);
-	for (sf::Text text : idInformation)
-		window.draw(text);
+	if (NETWORK.GetNetworkState() == NetworkState::CONNECTED_TO_SERVER_TCP)
+	{
+		if (searchingGame)
+		{
+			for (sf::RectangleShape buton : cancelButtons)
+				window.draw(buton);
+			for (sf::Text text : cancelButtonsTexts)
+				window.draw(text);
+		}
+		else
+		{
+			for (sf::RectangleShape buton : buttons)
+				window.draw(buton);
+			for (sf::Text text : buttonsTexts)
+				window.draw(text);
+		}
+	}
+}
 
-	window.display();
+void MatchMackingScene::DetectRectangle(sf::Vector2f mousePosition)
+{
+	if (NETWORK.GetNetworkState() != NetworkState::CONNECTED_TO_SERVER_TCP)
+		return;
+
+	for (size_t i = 0; i < cancelButtons.size(); i++) {
+		if (cancelButtons[i].getGlobalBounds().contains(mousePosition) && searchingGame) {
+
+			CustomTCPPacket customPacket(CANCEL_QUEUE);
+			EVENT_MANAGER.TCPEmit(customPacket.type, customPacket);
+			searchingGame = false;
+		}
+	}
+
+	for (size_t i = 0; i < buttons.size(); i++) {
+		if (buttons[i].getGlobalBounds().contains(mousePosition) && !searchingGame) {
+
+			CustomTCPPacket customPacket(START_QUEUE);
+			EVENT_MANAGER.TCPEmit(customPacket.type, customPacket);
+			searchingGame = true;
+		}
+	}
+}
+
+
+void MatchMackingScene::CreateButtons(sf::RenderWindow& window)
+{
+	buttons.push_back(sf::RectangleShape());
+	buttonsTexts.push_back(sf::Text(SCENE.GetFont()));
+
+	sf::Vector2f position(
+		window.getSize().x / 2.f - 150,
+		window.getSize().y / 2.f
+	);
+	std::string text;
+	text = "Join Friendly Game";
+
+	buttons[0].setSize({ 300.f, 75.f });
+	buttons[0].setFillColor(sf::Color::Green);
+	buttons[0].setOrigin(buttons[0].getSize() / 2.f);
+	buttons[0].setPosition(position);
+
+	buttonsTexts[0].setString(text);
+	buttonsTexts[0].setFillColor(sf::Color::Black);
+
+	sf::FloatRect textBounds = buttonsTexts[0].getLocalBounds();
+	buttonsTexts[0].setOrigin(sf::Vector2f(
+		textBounds.position.x + textBounds.size.x / 2.f,
+		textBounds.position.y + textBounds.size.y / 2.f
+	));
+
+	buttonsTexts[0].setPosition(position);
+}
+
+void MatchMackingScene::CreateCancelButtons(sf::RenderWindow& window)
+{
+	cancelButtons.push_back(sf::RectangleShape());
+	cancelButtonsTexts.push_back(sf::Text(SCENE.GetFont()));
+
+	sf::Vector2f position(
+		window.getSize().x / 2.f + 150,
+		window.getSize().y / 2.f
+	);
+
+	std::string text;
+	text = "Cancel Queue";
+
+	cancelButtons[0].setSize({ 300.f, 75.f });
+	cancelButtons[0].setFillColor(sf::Color::Green);
+	cancelButtons[0].setOrigin(cancelButtons[0].getSize() / 2.f);
+	cancelButtons[0].setPosition(position);
+
+	cancelButtonsTexts[0].setString(text);
+	cancelButtonsTexts[0].setFillColor(sf::Color::Black);
+
+	sf::FloatRect textBounds = cancelButtonsTexts[0].getLocalBounds();
+	cancelButtonsTexts[0].setOrigin(sf::Vector2f(
+		textBounds.position.x + textBounds.size.x / 2.f,
+		textBounds.position.y + textBounds.size.y / 2.f
+	));
+
+	cancelButtonsTexts[0].setPosition(position);
+}
+
+void MatchMackingScene::SetCurrentPlayer(int id)
+{
 }

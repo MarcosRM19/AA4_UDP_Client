@@ -28,22 +28,22 @@ void RegisterScene::CreateButtons(sf::RenderWindow& window, int id)
 
 	sf::Vector2f position(
 		window.getSize().x / 2.f,
-		window.getSize().y / 2.f + 200.f
+		window.getSize().y / 2.f + 100.f
 	);
 	std::string text;
 
 	if (id == 0)
 	{
-		position.x -= 200;
+		position.x -= 150;
 		text = "Register";
 	}
 	else
 	{
-		position.x += 200;
+		position.x += 150;
 		text = "Login";
 	}
 
-	buttons[id].setSize({ 300.f, 75.f });
+	buttons[id].setSize({ 200.f, 75.f });
 	buttons[id].setFillColor(sf::Color::Green);
 	buttons[id].setOrigin(buttons[id].getSize() / 2.f);
 	buttons[id].setPosition(position);
@@ -68,18 +68,18 @@ void RegisterScene::CreateTextField(sf::RenderWindow& window, int id)
 
 	sf::Vector2f position(
 		window.getSize().x / 2.f,
-		window.getSize().y / 2.f - 100.f
+		window.getSize().y / 2.f - 50.f
 	);
 	std::string text;
 
 	if (id == 0)
 	{
-		position.x -= 200;
+		position.x -= 150;
 		text = "Name";
 	}
 	else
 	{
-		position.x += 200;
+		position.x += 150;
 		text = "Password";
 	}
 
@@ -124,21 +124,18 @@ void RegisterScene::Render(sf::RenderWindow& window)
 		window.draw(text);
 	for (sf::Text text : texts)
 		window.draw(text);
-
-	window.display();
 }
-
 
 void RegisterScene::DetectRectangle(sf::Vector2f mousePosition)
 {
-	for (size_t i = 0; i < textBackGround.size(); ++i) {
+	for (size_t i = 0; i < textBackGround.size(); i++) {
 		if (textBackGround[i].getGlobalBounds().contains(mousePosition)) {
 			inputText = std::string();
 			currentText = &texts[i];
 		}
 	}
 
-	for (size_t i = 0; i < buttons.size(); ++i) {
+	for (size_t i = 0; i < buttons.size(); i++) {
 		if (buttons[i].getGlobalBounds().contains(mousePosition)) {
 			currentText = nullptr;
 
@@ -147,18 +144,18 @@ void RegisterScene::DetectRectangle(sf::Vector2f mousePosition)
 
 			if (i == 0) 
 			{
-				CustomPacket customPacket(REGISTER);
+				CustomTCPPacket customPacket(REGISTER);
 				customPacket.packet << texts[0].getString().toAnsiString() << texts[1].getString().toAnsiString();
 
-				EVENT_MANAGER.Emit(REGISTER, customPacket);
+				EVENT_MANAGER.TCPEmit(REGISTER, customPacket);
 				std::cout << "Register Send" << std::endl;
 			}
 			else if (i == 1) 
 			{
-				CustomPacket customPacket(LOGIN);
+				CustomTCPPacket customPacket(LOGIN);
 				customPacket.packet << texts[0].getString().toAnsiString() << texts[1].getString().toAnsiString();
 
-				EVENT_MANAGER.Emit(LOGIN, customPacket);
+				EVENT_MANAGER.TCPEmit(LOGIN, customPacket);
 				std::cout << "Login Send" << std::endl;
 			}
 		}
@@ -173,15 +170,18 @@ bool RegisterScene::EmptyInformation()
 	return false;
 }
 
+void RegisterScene::SetCurrentPlayer(int id)
+{
+}
+
 void RegisterScene::Exit()
 {
 	std::cout << "Exit Register Scene" << std::endl;
 }
 
-void RegisterScene::Update(sf::RenderWindow& window, const sf::Event& event)
+void RegisterScene::Update()
 {
-	HandleEvent(window, event);
-	Render(window);
+
 }
 
 
