@@ -220,7 +220,6 @@ void PacketManager::Init()
 
 	EVENT_MANAGER.UDPSubscribe(RECEIVE_STOP_SHOOT, [this](CustomUDPPacket& customPacket) {
 		std::cout << "Stop Shoot" << std::endl;
-		//Activar que el otro jugador pare de disparar
 		GAME.GetEnemyPlayer()->SetShootRequested(false);
 		});
 
@@ -239,6 +238,8 @@ void PacketManager::Init()
 		int idMessage = 0;
 		size_t size = customPacket.payloadOffset;
 		customPacket.ReadVariable(idMessage, size);
+
+		std::cout << idMessage << std::endl;
 
 		//Reload the buffer with the ID from the customPacket
 		_customPacket.WriteVariable(idMessage);
@@ -262,6 +263,7 @@ void PacketManager::Init()
 				pkt.ReadVariable(pktId, pktOffset);
 				return pktId == incomingId;
 			});
+		std::cout << incomingId << std::endl;
 
 		if (it != criticsPacketsClient.end()) {
 			criticsPacketsClient.erase(it, criticsPacketsClient.end());

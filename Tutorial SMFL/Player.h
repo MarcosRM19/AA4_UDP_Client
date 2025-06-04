@@ -4,8 +4,8 @@
 #include <SFML/Audio.hpp>
 #include <functional>
 
-const sf::Time interval = sf::seconds(0.1f);
-const sf::Time interpolationTime = sf::seconds(0.5f);
+const sf::Time interval = sf::seconds(0.05f);
+const sf::Time interpolationTime = sf::seconds(0.2f);
 
 struct ValidPackets
 {
@@ -45,6 +45,7 @@ private:
     sf::Clock interpolationTimer;
     float totalTime;
     
+    bool isAlive;
 
     bool facingRight;
 

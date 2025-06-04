@@ -43,6 +43,7 @@ Player::Player(sf::Vector2f startPosition, sf::Color color)
 
     startInterpolate = false;
     totalTime = 1;
+    isAlive = true;
 }
 
 void Player::SetShootCallback(std::function<void(const sf::Vector2f&, const sf::Vector2f&)> callback)
@@ -152,7 +153,7 @@ void Player::UpdateEnemy(float deltaTime)
     }
 
     //este codigo es de chatgpt
-    if (interpolationTimer.getElapsedTime() >= interpolationTime)
+    if (interpolationTimer.getElapsedTime() >= interpolationTime && !startInterpolate)
     {
         startInterpolate = true;
         interpolationTimer.restart(); 
@@ -174,7 +175,9 @@ void Player::UpdateEnemy(float deltaTime)
             validPackets.push_back(enemyPositions[i]);
         }
 
-        float t = elapsedTime.getElapsedTime().asSeconds() / 0.45;
+        float t = elapsedTime.getElapsedTime().asSeconds() / interpolationTime.asSeconds();
+        t = std::min(t, 1.f);
+
         float segmentLength = 1.f / (validPackets.size() - 1);
         size_t segmentIndex = static_cast<size_t>(t / segmentLength);
 
@@ -183,6 +186,17 @@ void Player::UpdateEnemy(float deltaTime)
             float normalizedT = (t - segmentIndex * segmentLength) / segmentLength;
             sprite->setPosition(Lerp(validPackets[segmentIndex].position, validPackets[segmentIndex + 1].position, normalizedT));
             position = Lerp(validPackets[segmentIndex].position, validPackets[segmentIndex + 1].position, normalizedT);
+
+            if (validPackets[segmentIndex + 1].position.x < validPackets[segmentIndex].position.x)
+            {
+                sprite->setScale({ -1.f * scale, scale });
+                facingRight = false;
+            }
+            else if(validPackets[segmentIndex + 1].position.x > validPackets[segmentIndex].position.x)
+            {
+                sprite->setScale({ scale, scale });
+                facingRight = true;
+            }
         }
 
         if (t >= 1.f)
@@ -196,7 +210,8 @@ void Player::UpdateEnemy(float deltaTime)
 
 void Player::Render(sf::RenderWindow& window)
 {
-    window.draw(*sprite);
+    if(isAlive)
+        window.draw(*sprite);
 }
 
 void Player::Mock()
@@ -238,7 +253,11 @@ void Player::ReceiveDamage()
         return;
     }
 
-    std::cout << "YOU LOSE";
+    isAlive = false;
+    if (idPlayer == GAME.GetReferencePlayer()->GetIdPlayer())
+        std::cout << "HAS PERDIDO" << std::endl;
+    else
+        std::cout << "HAS GANADO" << std::endl;
 }
 
 void Player::SendPosition()
@@ -303,7 +322,7 @@ void Player::SentCriticPacket(PacketType type)
     customPacket.WriteVariable(idCritic);
     idCritic++;
 
-    //EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
+    EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
 }
 
 void Player::AddEnemyPosition(sf::Vector2f newPosition, int id)

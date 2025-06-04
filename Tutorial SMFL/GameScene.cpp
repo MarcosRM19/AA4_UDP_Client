@@ -161,21 +161,21 @@ void GameScene::DetectRectangle(sf::Vector2f mousePosition)
 void GameScene::SetCurrentPlayer(int id)
 {
     if (id == 0)
-    {
-        GAME.SetReferencePlayer(players[0].get());
-        GAME.SetEnemyPlayer(players[1].get());
-    }
+        RecognizePlayer(0, 1);
     else
-    {
-        GAME.SetReferencePlayer(players[1].get());
-        GAME.SetEnemyPlayer(players[0].get());
-    }
+        RecognizePlayer(1, 0);
 
-    GAME.GetReferencePlayer()->SetId(id);
     playerId = id;
-    std::cout << id << std::endl;
     GAME.GetReferencePlayer()->SetColor(sf::Color::Blue);
     GAME.GetEnemyPlayer()->SetColor(sf::Color::Red);
+}
+
+void GameScene::RecognizePlayer(int idReferencePlayer, int idEnemy)
+{
+    GAME.SetReferencePlayer(players[idReferencePlayer].get());
+    GAME.SetEnemyPlayer(players[idEnemy].get());
+    GAME.GetReferencePlayer()->SetId(idReferencePlayer);
+    GAME.GetEnemyPlayer()->SetId(idEnemy);
 }
 
 
