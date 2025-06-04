@@ -128,7 +128,7 @@ void PacketManager::Init()
 	EVENT_MANAGER.TCPSubscribe(MATCH_FOUND, [this](CustomTCPPacket& customPacket) {
 		std::cout << "Match Found" << std::endl;
 		NETWORK.DisconnectTCPServer();
-
+		criticsPacketsServer.clear();
 		std::string ipString;
 		int port;
 		int enemyId;
@@ -157,6 +157,7 @@ void PacketManager::Init()
 		});
 
 	EVENT_MANAGER.UDPSubscribe(START_GAME, [this](CustomUDPPacket& customPacket) {
+		std::cout << "ENTRA" << std::endl;
 		SCENE.ChangeScene(new GameScene());
 		
 		SCENE.GetCurrentScene()->SetCurrentPlayer(localIdPlayer);
