@@ -18,6 +18,8 @@ const sf::IpAddress SERVER_IP = sf::IpAddress(93, 176, 163, 135);
 //const sf::IpAddress SERVER_IP = sf::IpAddress(192,168,1,71);
 
 const sf::Time intervalCriticPacket = sf::seconds(0.5f);
+const sf::Time originalPingTime = sf::seconds(0.5f);
+const sf::Time pingTimeExtra = sf::seconds(2.f);
 
 class NetworkManager
 {
@@ -44,6 +46,8 @@ private:
     char udpBuffer[1024];
     std::size_t udpReceivedSize;
 
+    sf::Clock pingClock;
+    sf::Time currentPingTime = originalPingTime;
     bool isRunning;
 
     NetworkManager() {};
@@ -89,6 +93,7 @@ public:
     std::shared_ptr<Client> GetClientByGuid(const std::string& guid);
     std::mutex& GetSelectorMutex() { return selectorMutex; }
     sf::SocketSelector& GetSocketSelector() { return socketSelector; }
+    void ResetClock() { pingClock.restart(); }
 
     inline std::shared_ptr<sf::UdpSocket> GetUDPSocket() const { return udpSocket; }
     inline int GetUDPPort() const { return udpServerPort; }

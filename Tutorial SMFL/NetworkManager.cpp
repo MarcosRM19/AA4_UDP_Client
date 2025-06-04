@@ -3,6 +3,7 @@
 #include "GameManager.h"
 #include <optional>
 #include "EventManager.h"
+#include "SceneManager.h"
 
 void NetworkManager::HandleServerCommunication()
 {
@@ -65,9 +66,10 @@ void NetworkManager::HandleUDPServerCommunication()
 		unsigned short senderPort;
 
 		sf::Socket::Status status = udpSocket->receive(udpBuffer, sizeof(udpBuffer), udpReceivedSize, senderIP, senderPort);
-
+		
 		if (status == sf::Socket::Status::Done)
 		{
+			pingClock.restart();
 			CustomUDPPacket customPacket;
 			customPacket.ReadBuffer(udpBuffer, udpReceivedSize);
 
@@ -94,6 +96,18 @@ void NetworkManager::HandleCriticCommunication()
 	{
 		PACKET_MANAGER.SendCriticsPackets();
 	}
+
+	if (pingClock.getElapsedTime() >= currentPingTime)
+	{
+		if (pingClock.getElapsedTime() >= pingTimeExtra)
+			SCENE.GetWindow().close();
+		else
+		{
+			PACKET_MANAGER.SendCriticsPackets();
+			currentPingTime += originalPingTime;
+		}
+	}
+
 }
 
 NetworkManager::~NetworkManager()

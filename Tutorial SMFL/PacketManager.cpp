@@ -129,6 +129,7 @@ void PacketManager::Init()
 		std::cout << "Match Found" << std::endl;
 		NETWORK.DisconnectTCPServer();
 		criticsPacketsServer.clear();
+		criticsPacketsClient.clear();
 		std::string ipString;
 		int port;
 		int enemyId;
@@ -167,6 +168,17 @@ void PacketManager::Init()
 	EVENT_MANAGER.UDPSubscribe(SEND_POSITION, [this](CustomUDPPacket& customPacket) {
 		//std::cout << "Position Send"<<std::endl;
 		SendPacketToUDPServer(customPacket);
+		});
+
+	EVENT_MANAGER.UDPSubscribe(SEND_PING, [this](CustomUDPPacket& customPacket) {
+		std::cout << "Send Ping"<<std::endl;
+		CustomUDPPacket _customPacket(UdpPacketType::NORMAL, RECEIVE_PING, PACKET_MANAGER.GetGlobalId());
+		SendPacketToUDPServer(_customPacket);
+		});
+
+	EVENT_MANAGER.UDPSubscribe(RECEIVE_PING, [this](CustomUDPPacket& customPacket) {
+		std::cout << "Receive Ping" << std::endl;
+		NETWORK.ResetClock();
 		});
 
 	EVENT_MANAGER.UDPSubscribe(VALIDATION_BACK, [this](CustomUDPPacket& customPacket) {
@@ -383,5 +395,11 @@ void PacketManager::SendCriticsPackets()
 	{
 		SendPacketToUDPServer(criticsPacketsClient[i]);
 	}
+}
+
+void PacketManager::SendPingPackets()
+{
+	CustomUDPPacket customPacket(UdpPacketType::NORMAL, SEND_PING, globalIdPlayer);
+	SendPacketToUDPServer(customPacket);
 }
 
