@@ -5,7 +5,7 @@
 #include <functional>
 
 const sf::Time interval = sf::seconds(0.05f);
-const sf::Time interpolationTime = sf::seconds(0.2f);
+const sf::Time interpolationTime = sf::seconds(0.1f);
 
 struct ValidPackets
 {
@@ -90,6 +90,7 @@ public:
 
     void SentCriticPacket(PacketType type);
     void AddEnemyPosition(sf::Vector2f newPosition, int id);
+    void CheckIsDead(int _lives);
 
     sf::FloatRect GetNextBounds(float deltaTime) const;
     inline sf::FloatRect GetGlobalBounds() const { return sprite->getGlobalBounds(); }

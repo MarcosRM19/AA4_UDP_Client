@@ -53,6 +53,8 @@ void Player::SetShootCallback(std::function<void(const sf::Vector2f&, const sf::
 
 void Player::HandleEvent(const sf::Event& event)
 {
+    if (!isAlive)
+        return;
     if (const sf::Event::KeyPressed* keyPressed = event.getIf<sf::Event::KeyPressed>())
     {
         if (keyPressed->code == sf::Keyboard::Key::Left)
@@ -127,6 +129,9 @@ void Player::PrepareMovement(float deltaTime)
 
 void Player::Update(float deltaTime)
 {
+    if (!isAlive)
+        return;
+
     if (shootTimer > 0.f)
         shootTimer -= deltaTime;
 
@@ -139,6 +144,9 @@ void Player::Update(float deltaTime)
 
 void Player::UpdateEnemy(float deltaTime)
 {
+    if (!isAlive)
+        return;
+
     if (shootTimer > 0.f)
         shootTimer -= deltaTime;
     
@@ -152,7 +160,6 @@ void Player::UpdateEnemy(float deltaTime)
         Mock();
     }
 
-    //este codigo es de chatgpt
     if (interpolationTimer.getElapsedTime() >= interpolationTime && !startInterpolate)
     {
         startInterpolate = true;
@@ -162,7 +169,7 @@ void Player::UpdateEnemy(float deltaTime)
 
     if (startInterpolate)
     {
-        if(enemyPositions.empty())
+        if (enemyPositions.empty())
             return;
 
         std::vector<ValidPackets> validPackets;
@@ -175,31 +182,31 @@ void Player::UpdateEnemy(float deltaTime)
             validPackets.push_back(enemyPositions[i]);
         }
 
-        float t = elapsedTime.getElapsedTime().asSeconds() / interpolationTime.asSeconds();
-        t = std::min(t, 1.f);
+        if (validPackets.size() < 2)
+            return;
 
-        float segmentLength = 1.f / (validPackets.size() - 1);
-        size_t segmentIndex = static_cast<size_t>(t / segmentLength);
+        sf::Vector2f firstPosition = validPackets[0].position;
+        sf::Vector2f lastPosition = validPackets.back().position;
 
-        if (segmentIndex < validPackets.size() - 1)
+        if (firstPosition.x > lastPosition.x)
         {
-            float normalizedT = (t - segmentIndex * segmentLength) / segmentLength;
-            sprite->setPosition(Lerp(validPackets[segmentIndex].position, validPackets[segmentIndex + 1].position, normalizedT));
-            position = Lerp(validPackets[segmentIndex].position, validPackets[segmentIndex + 1].position, normalizedT);
-
-            if (validPackets[segmentIndex + 1].position.x < validPackets[segmentIndex].position.x)
-            {
-                sprite->setScale({ -1.f * scale, scale });
-                facingRight = false;
-            }
-            else if(validPackets[segmentIndex + 1].position.x > validPackets[segmentIndex].position.x)
-            {
-                sprite->setScale({ scale, scale });
-                facingRight = true;
-            }
+            sprite->setScale({ -1.f * scale, scale });
+            facingRight = false;
+        }
+        else if (firstPosition.x < lastPosition.x)
+        {
+            sprite->setScale({ scale, scale });
+            facingRight = true;
         }
 
-        if (t >= 1.f)
+        float t = elapsedTime.getElapsedTime().asSeconds() / interpolationTime.asSeconds();
+
+        sprite->setPosition(Lerp(firstPosition, lastPosition, t));
+        position = Lerp(firstPosition, lastPosition, t);
+
+      
+
+        if (elapsedTime.getElapsedTime().asSeconds() > interpolationTime.asSeconds())
         {
             elapsedTime.restart();
             enemyPositions.clear();
@@ -247,8 +254,6 @@ void Player::ReceiveDamage()
 
     if (lives > 1)
     {
-        lives--;
-        health = initialHealth;
         Respawn();
         return;
     }
@@ -262,6 +267,8 @@ void Player::ReceiveDamage()
 
 void Player::SendPosition()
 {
+    if (!isAlive)
+        return;
     if (sendPositionClock.getElapsedTime() >= interval)
     {
         CustomUDPPacket customPacket(UdpPacketType::NORMAL, SEND_POSITION, PACKET_MANAGER.GetGlobalId());
@@ -281,10 +288,12 @@ void Player::SendPosition()
 
 void Player::Respawn()
 {
+    lives--;
+    health = initialHealth;
     position = GAME.GetSpawnPositions()[2];
     sprite->setPosition(position);
 
-    SentCriticPacket(RESPAWN);
+    SentCriticPacket(SEND_RESPAWN);
 }
 sf::FloatRect Player::GetNextBounds(float deltaTime) const
 {
@@ -294,6 +303,8 @@ sf::FloatRect Player::GetNextBounds(float deltaTime) const
 
 void Player::BacktToValidPosition(int id)
 {
+    if (!isAlive)
+        return;
     for (int i = 0; i < positionsPackets.size(); i++)
     {
         int _id = 0;
@@ -320,11 +331,13 @@ void Player::ResetPositionsPackets()
 
 void Player::SentCriticPacket(PacketType type)
 {
+    if (!isAlive)
+        return;
     CustomUDPPacket customPacket(UdpPacketType::CRITIC, type, PACKET_MANAGER.GetGlobalId());
     customPacket.WriteVariable(idCritic);
     idCritic++;
 
-    if (type == RESPAWN)
+    if (type == SEND_RESPAWN)
     {
         if(GAME.GetReferencePlayer()->GetIdPlayer() == idPlayer)
             customPacket.WriteVariable(true);
@@ -335,6 +348,7 @@ void Player::SentCriticPacket(PacketType type)
         idMovement++;
         customPacket.WriteVariable(position.x);
         customPacket.WriteVariable(position.y);
+        customPacket.WriteVariable(lives);
     }
 
     EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
@@ -342,7 +356,26 @@ void Player::SentCriticPacket(PacketType type)
 
 void Player::AddEnemyPosition(sf::Vector2f newPosition, int id)
 {
-    enemyPositions.push_back({ newPosition, id });          
+    enemyPositions.push_back({ newPosition, id });        
+}
+
+void Player::CheckIsDead(int _lives)
+{
+    if (lives == _lives)
+        return;
+
+    std::cout << "Rectificación al morir" << std::endl;
+    if (lives > 1)
+    {
+        Respawn();
+        return;
+    }
+
+    isAlive = false;
+    if (idPlayer == GAME.GetReferencePlayer()->GetIdPlayer())
+        std::cout << "HAS PERDIDO" << std::endl;
+    else
+        std::cout << "HAS GANADO" << std::endl;
 }
 
 sf::Vector2f Player::Lerp(const sf::Vector2f& start, const sf::Vector2f& end, float t)

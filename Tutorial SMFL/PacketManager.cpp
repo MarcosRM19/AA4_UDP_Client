@@ -228,10 +228,25 @@ void PacketManager::Init()
 		GAME.GetEnemyPlayer()->SetMockeryRequested(true);
 		});
 
-	EVENT_MANAGER.UDPSubscribe(RESPAWN, [this](CustomUDPPacket& customPacket) {
+	EVENT_MANAGER.UDPSubscribe(SEND_RESPAWN, [this](CustomUDPPacket& customPacket) {
 		std::cout << "Respawn" << std::endl;
 		criticsPacketsClient.push_back(customPacket);
 		SendPacketToUDPServer(customPacket);
+		});
+
+	EVENT_MANAGER.UDPSubscribe(RECEIVE_RESPAWN, [this](CustomUDPPacket& customPacket) {
+		std::cout << "Do Mockery" << std::endl;
+		int criticId;
+		bool player;
+		int lives;
+		customPacket.ReadVariable(criticId, customPacket.payloadOffset);
+		customPacket.ReadVariable(player, customPacket.payloadOffset);
+		customPacket.ReadVariable(lives, customPacket.payloadOffset);
+
+		if (player)
+			GAME.GetEnemyPlayer()->CheckIsDead(lives);
+		else
+			GAME.GetEnemyPlayer()->CheckIsDead(lives);
 		});
 
 	EVENT_MANAGER.UDPSubscribe(SEND_ACK, [this](CustomUDPPacket& customPacket) {
