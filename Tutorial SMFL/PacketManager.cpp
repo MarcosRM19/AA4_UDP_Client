@@ -229,13 +229,13 @@ void PacketManager::Init()
 		});
 
 	EVENT_MANAGER.UDPSubscribe(SEND_RESPAWN, [this](CustomUDPPacket& customPacket) {
-		std::cout << "Respawn" << std::endl;
+		std::cout << "Send Respawn" << std::endl;
 		criticsPacketsClient.push_back(customPacket);
 		SendPacketToUDPServer(customPacket);
 		});
 
 	EVENT_MANAGER.UDPSubscribe(RECEIVE_RESPAWN, [this](CustomUDPPacket& customPacket) {
-		std::cout << "Do Mockery" << std::endl;
+		std::cout << "Receive Respawn" << std::endl;
 		int criticId;
 		bool player;
 		int lives;
@@ -246,11 +246,23 @@ void PacketManager::Init()
 		if (player)
 			GAME.GetEnemyPlayer()->CheckIsDead(lives);
 		else
-			GAME.GetEnemyPlayer()->CheckIsDead(lives);
+			GAME.GetReferencePlayer()->CheckIsDead(lives);
+		});
+
+	EVENT_MANAGER.UDPSubscribe(END_GAME, [this](CustomUDPPacket& customPacket) {
+		std::cout << "End Game" << std::endl;
+		std::string message;
+		customPacket.ReadString(message, customPacket.payloadOffset);
+
+		std::cout << message << std::endl;
+
+		SCENE.ChangeScene(new RegisterScene());
+		NETWORK.DisconnectUDPServer();
+		NETWORK.ConnectToServer();
 		});
 
 	EVENT_MANAGER.UDPSubscribe(SEND_ACK, [this](CustomUDPPacket& customPacket) {
-		std::cout << "Send ACK packet" << std::endl;
+		//std::cout << "Send ACK packet" << std::endl;
 
 		//Create UDP Packet 
 		CustomUDPPacket _customPacket(UdpPacketType::NORMAL, RECEIVE_ACK, globalIdPlayer);
@@ -268,7 +280,7 @@ void PacketManager::Init()
 		});
 
 	EVENT_MANAGER.UDPSubscribe(RECEIVE_ACK, [this](CustomUDPPacket& customPacket) {
-		std::cout << "Receive ACK packet" << std::endl;
+		//std::cout << "Receive ACK packet" << std::endl;
 
 		//Read the critic id 
 		int incomingId = 0;
@@ -285,10 +297,10 @@ void PacketManager::Init()
 
 		if (it != criticsPacketsClient.end()) {
 			criticsPacketsClient.erase(it, criticsPacketsClient.end());
-			std::cout << "Removed ACK packet with ID " << incomingId << std::endl;
+			//std::cout << "Removed ACK packet with ID " << incomingId << std::endl;
 		}
 		else {
-			std::cout << "No matching packet found to remove" << std::endl;
+			//std::cout << "No matching packet found to remove" << std::endl;
 		}
 
 		});
@@ -341,6 +353,9 @@ void PacketManager::ProcessUDPReceivedPacket(CustomUDPPacket& customPacket)
 
 void PacketManager::SendPacketToUDPServer(CustomUDPPacket& responsePacket)
 {
+	if (NETWORK.GetNetworkState() != NetworkState::CONNECTED_TO_SERVER_UDP)
+		return;
+
 	if (NETWORK.GetUDPSocket()->send(responsePacket.buffer, responsePacket.bufferSize, NETWORK.GetUDPIPAdrres(), NETWORK.GetUDPPort()) == sf::Socket::Status::Done)
 	{
 		//std::cout << "Packet send to UDP server" << std::endl;

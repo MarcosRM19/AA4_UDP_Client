@@ -2,6 +2,7 @@
 #include "GameManager.h"
 #include <iostream>
 #include "EventManager.h"
+#include "NetworkManager.h"
 
 Player::Player(sf::Vector2f startPosition, sf::Color color)
     : position(startPosition)
@@ -52,9 +53,7 @@ void Player::SetShootCallback(std::function<void(const sf::Vector2f&, const sf::
 }
 
 void Player::HandleEvent(const sf::Event& event)
-{
-    if (!isAlive)
-        return;
+{;
     if (const sf::Event::KeyPressed* keyPressed = event.getIf<sf::Event::KeyPressed>())
     {
         if (keyPressed->code == sf::Keyboard::Key::Left)
@@ -251,18 +250,7 @@ void Player::ReceiveDamage()
         health--;
         return;
     }
-
-    if (lives > 1)
-    {
-        Respawn();
-        return;
-    }
-
-    isAlive = false;
-    if (idPlayer == GAME.GetReferencePlayer()->GetIdPlayer())
-        std::cout << "HAS PERDIDO" << std::endl;
-    else
-        std::cout << "HAS GANADO" << std::endl;
+    Respawn();
 }
 
 void Player::SendPosition()
@@ -339,16 +327,15 @@ void Player::SentCriticPacket(PacketType type)
 
     if (type == SEND_RESPAWN)
     {
-        if(GAME.GetReferencePlayer()->GetIdPlayer() == idPlayer)
-            customPacket.WriteVariable(true);
-        else
-            customPacket.WriteVariable(false);
-
+        bool value = GAME.GetReferencePlayer()->GetIdPlayer() == idPlayer;
+        customPacket.WriteVariable(value);
         customPacket.WriteVariable(idMovement);
         idMovement++;
         customPacket.WriteVariable(position.x);
         customPacket.WriteVariable(position.y);
         customPacket.WriteVariable(lives);
+
+        std::cout << lives << std::endl;
     }
 
     EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
@@ -361,21 +348,11 @@ void Player::AddEnemyPosition(sf::Vector2f newPosition, int id)
 
 void Player::CheckIsDead(int _lives)
 {
+    std::cout << lives << " " << _lives << std::endl;
     if (lives == _lives)
         return;
 
-    std::cout << "Rectificación al morir" << std::endl;
-    if (lives > 1)
-    {
-        Respawn();
-        return;
-    }
-
-    isAlive = false;
-    if (idPlayer == GAME.GetReferencePlayer()->GetIdPlayer())
-        std::cout << "HAS PERDIDO" << std::endl;
-    else
-        std::cout << "HAS GANADO" << std::endl;
+    Respawn();   
 }
 
 sf::Vector2f Player::Lerp(const sf::Vector2f& start, const sf::Vector2f& end, float t)

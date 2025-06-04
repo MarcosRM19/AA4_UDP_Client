@@ -28,8 +28,8 @@ private:
     bool isOnGround;
 
     float initialHealth;
-    float health;
-    float lives;
+    int health;
+    int lives;
 
     float shootCooldown;
     float shootTimer;
@@ -100,6 +100,7 @@ public:
     inline const int GetIdPlayer() { return idPlayer; }
     inline int GetIdCritic() { return idCritic; }
     inline std::vector<ValidPackets> GetEnemyPosition() {return enemyPositions; }
+    inline int GetLives() { return lives; }
     
     inline void StopVertical() { velocity.y = 0.f; }
     inline void SetColor(sf::Color color) { sprite->setColor(color); }
@@ -110,6 +111,7 @@ public:
     inline void SetStartInterpolate(bool state) { startInterpolate = state; }
 
     inline void AddIdCritic() { idCritic++; }
+    inline void SetIdCritic(int id) { idCritic = id; }
     inline void RestartElapsedTime() { elapsedTime.restart(); }
 
     sf::Vector2f Lerp(const sf::Vector2f& start, const sf::Vector2f& end, float t);
