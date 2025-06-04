@@ -18,6 +18,7 @@ private:
 
     std::vector<CustomUDPPacket> criticsPacketsServer;
     std::vector<CustomUDPPacket> criticsPacketsClient;
+
     int globalIdPlayer;
     int localIdPlayer;
 
@@ -39,6 +40,7 @@ public:
     void SendPacketToTCPServer(CustomTCPPacket& responsePacket);
 
     void SendCriticsPackets();
+    void SendPingPackets();
 
     inline void AddCriticalPacketClient(CustomUDPPacket customPacket) { criticsPacketsClient.push_back(customPacket); }
 

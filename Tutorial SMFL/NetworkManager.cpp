@@ -3,6 +3,7 @@
 #include "GameManager.h"
 #include <optional>
 #include "EventManager.h"
+#include "SceneManager.h"
 
 void NetworkManager::HandleServerCommunication()
 {
@@ -60,17 +61,19 @@ void NetworkManager::HandleUDPServerCommunication()
 
 		if (state != NetworkState::CONNECTED_TO_SERVER_UDP)
 			break;
+			
 
 		std::optional<sf::IpAddress> senderIP;
 		unsigned short senderPort;
 
 		sf::Socket::Status status = udpSocket->receive(udpBuffer, sizeof(udpBuffer), udpReceivedSize, senderIP, senderPort);
-
+		
 		if (status == sf::Socket::Status::Done)
 		{
 			CustomUDPPacket customPacket;
 			customPacket.ReadBuffer(udpBuffer, udpReceivedSize);
 
+			pingClock.restart();
 			PACKET_MANAGER.ProcessUDPReceivedPacket(customPacket);
 		}
 		else if (status == sf::Socket::Status::Disconnected)
@@ -85,6 +88,8 @@ void NetworkManager::HandleUDPServerCommunication()
 
 			udpSocket.reset();
 		}
+
+		HandleCriticCommunication();
 	}
 }
 
@@ -94,6 +99,12 @@ void NetworkManager::HandleCriticCommunication()
 	{
 		PACKET_MANAGER.SendCriticsPackets();
 	}
+
+	if (pingClock.getElapsedTime() >= pingTimeExtra)
+		SCENE.GetWindow().close();
+
+	if (pingClock.getElapsedTime() >= pingTime)
+		PACKET_MANAGER.SendPingPackets();
 }
 
 NetworkManager::~NetworkManager()
@@ -136,7 +147,6 @@ void NetworkManager::Update()
 		break;
 	case NetworkState::CONNECTED_TO_SERVER_UDP:
 		HandleUDPServerCommunication();
-		HandleCriticCommunication();
 	default:
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		break;
