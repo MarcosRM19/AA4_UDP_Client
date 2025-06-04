@@ -228,6 +228,12 @@ void PacketManager::Init()
 		GAME.GetEnemyPlayer()->SetMockeryRequested(true);
 		});
 
+	EVENT_MANAGER.UDPSubscribe(RESPAWN, [this](CustomUDPPacket& customPacket) {
+		std::cout << "Respawn" << std::endl;
+		criticsPacketsClient.push_back(customPacket);
+		SendPacketToUDPServer(customPacket);
+		});
+
 	EVENT_MANAGER.UDPSubscribe(SEND_ACK, [this](CustomUDPPacket& customPacket) {
 		std::cout << "Send ACK packet" << std::endl;
 
@@ -238,8 +244,6 @@ void PacketManager::Init()
 		int idMessage = 0;
 		size_t size = customPacket.payloadOffset;
 		customPacket.ReadVariable(idMessage, size);
-
-		std::cout << idMessage << std::endl;
 
 		//Reload the buffer with the ID from the customPacket
 		_customPacket.WriteVariable(idMessage);
@@ -263,7 +267,6 @@ void PacketManager::Init()
 				pkt.ReadVariable(pktId, pktOffset);
 				return pktId == incomingId;
 			});
-		std::cout << incomingId << std::endl;
 
 		if (it != criticsPacketsClient.end()) {
 			criticsPacketsClient.erase(it, criticsPacketsClient.end());

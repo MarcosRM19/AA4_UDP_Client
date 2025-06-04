@@ -283,6 +283,8 @@ void Player::Respawn()
 {
     position = GAME.GetSpawnPositions()[2];
     sprite->setPosition(position);
+
+    SentCriticPacket(RESPAWN);
 }
 sf::FloatRect Player::GetNextBounds(float deltaTime) const
 {
@@ -321,6 +323,19 @@ void Player::SentCriticPacket(PacketType type)
     CustomUDPPacket customPacket(UdpPacketType::CRITIC, type, PACKET_MANAGER.GetGlobalId());
     customPacket.WriteVariable(idCritic);
     idCritic++;
+
+    if (type == RESPAWN)
+    {
+        if(GAME.GetReferencePlayer()->GetIdPlayer() == idPlayer)
+            customPacket.WriteVariable(true);
+        else
+            customPacket.WriteVariable(false);
+
+        customPacket.WriteVariable(idMovement);
+        idMovement++;
+        customPacket.WriteVariable(position.x);
+        customPacket.WriteVariable(position.y);
+    }
 
     EVENT_MANAGER.UDPEmit(customPacket.type, customPacket);
 }
