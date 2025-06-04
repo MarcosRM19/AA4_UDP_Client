@@ -61,6 +61,7 @@ void NetworkManager::HandleUDPServerCommunication()
 
 		if (state != NetworkState::CONNECTED_TO_SERVER_UDP)
 			break;
+			
 
 		std::optional<sf::IpAddress> senderIP;
 		unsigned short senderPort;
@@ -69,10 +70,10 @@ void NetworkManager::HandleUDPServerCommunication()
 		
 		if (status == sf::Socket::Status::Done)
 		{
-			pingClock.restart();
 			CustomUDPPacket customPacket;
 			customPacket.ReadBuffer(udpBuffer, udpReceivedSize);
 
+			pingClock.restart();
 			PACKET_MANAGER.ProcessUDPReceivedPacket(customPacket);
 		}
 		else if (status == sf::Socket::Status::Disconnected)
@@ -87,6 +88,8 @@ void NetworkManager::HandleUDPServerCommunication()
 
 			udpSocket.reset();
 		}
+
+		HandleCriticCommunication();
 	}
 }
 
@@ -97,17 +100,11 @@ void NetworkManager::HandleCriticCommunication()
 		PACKET_MANAGER.SendCriticsPackets();
 	}
 
-	if (pingClock.getElapsedTime() >= currentPingTime)
-	{
-		if (pingClock.getElapsedTime() >= pingTimeExtra)
-			SCENE.GetWindow().close();
-		else
-		{
-			PACKET_MANAGER.SendCriticsPackets();
-			currentPingTime += originalPingTime;
-		}
-	}
+	if (pingClock.getElapsedTime() >= pingTimeExtra)
+		SCENE.GetWindow().close();
 
+	if (pingClock.getElapsedTime() >= pingTime)
+		PACKET_MANAGER.SendPingPackets();
 }
 
 NetworkManager::~NetworkManager()
@@ -150,7 +147,6 @@ void NetworkManager::Update()
 		break;
 	case NetworkState::CONNECTED_TO_SERVER_UDP:
 		HandleUDPServerCommunication();
-		HandleCriticCommunication();
 	default:
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		break;

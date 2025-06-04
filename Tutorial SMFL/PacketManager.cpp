@@ -163,6 +163,7 @@ void PacketManager::Init()
 		
 		SCENE.GetCurrentScene()->SetCurrentPlayer(localIdPlayer);
 		GAME.GetReferencePlayer()->AddIdCritic();
+		NETWORK.ResetClock();
 		});
 
 	EVENT_MANAGER.UDPSubscribe(SEND_POSITION, [this](CustomUDPPacket& customPacket) {
