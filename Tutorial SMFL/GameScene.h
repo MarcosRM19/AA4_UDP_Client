@@ -37,5 +37,6 @@ public:
     void SetShootCallback(std::function<void(const sf::Vector2f&, const sf::Vector2f&)> callback);
     void CreateBullet(const sf::Vector2f& bulletPos, const sf::Vector2f& bulletDir);
     void SetCurrentPlayer(int id) override;
+    void RecognizePlayer(int idReferencePlayer, int idEnemy);
 };
 

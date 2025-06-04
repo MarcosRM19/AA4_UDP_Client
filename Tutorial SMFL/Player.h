@@ -4,7 +4,17 @@
 #include <SFML/Audio.hpp>
 #include <functional>
 
-const sf::Time interval = sf::seconds(0.25f);
+const sf::Time interval = sf::seconds(0.05f);
+const sf::Time interpolationTime = sf::seconds(0.1f);
+
+struct ValidPackets
+{
+    sf::Vector2f position;
+    int id;
+
+    ValidPackets() = default;
+    ValidPackets(sf::Vector2f position, int id) : position(position), id(id) {};
+};
 
 class Player
 {
@@ -18,8 +28,8 @@ private:
     bool isOnGround;
 
     float initialHealth;
-    float health;
-    float lives;
+    int health;
+    int lives;
 
     float shootCooldown;
     float shootTimer;
@@ -30,10 +40,12 @@ private:
     bool shootRequested;
     bool mockeryRequested;
 
-    std::vector<sf::Vector2f> enemyPositions;
+    std::vector<ValidPackets> enemyPositions;
     sf::Clock elapsedTime;
+    sf::Clock interpolationTimer;
     float totalTime;
     
+    bool isAlive;
 
     bool facingRight;
 
@@ -78,6 +90,7 @@ public:
 
     void SentCriticPacket(PacketType type);
     void AddEnemyPosition(sf::Vector2f newPosition, int id);
+    void CheckIsDead(int _lives);
 
     sf::FloatRect GetNextBounds(float deltaTime) const;
     inline sf::FloatRect GetGlobalBounds() const { return sprite->getGlobalBounds(); }
@@ -86,6 +99,8 @@ public:
     inline sf::Vector2f GetSize() const { return sprite->getGlobalBounds().size; }
     inline const int GetIdPlayer() { return idPlayer; }
     inline int GetIdCritic() { return idCritic; }
+    inline std::vector<ValidPackets> GetEnemyPosition() {return enemyPositions; }
+    inline int GetLives() { return lives; }
     
     inline void StopVertical() { velocity.y = 0.f; }
     inline void SetColor(sf::Color color) { sprite->setColor(color); }
@@ -96,6 +111,7 @@ public:
     inline void SetStartInterpolate(bool state) { startInterpolate = state; }
 
     inline void AddIdCritic() { idCritic++; }
+    inline void SetIdCritic(int id) { idCritic = id; }
     inline void RestartElapsedTime() { elapsedTime.restart(); }
 
     sf::Vector2f Lerp(const sf::Vector2f& start, const sf::Vector2f& end, float t);

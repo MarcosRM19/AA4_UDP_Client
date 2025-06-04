@@ -128,7 +128,7 @@ void PacketManager::Init()
 	EVENT_MANAGER.TCPSubscribe(MATCH_FOUND, [this](CustomTCPPacket& customPacket) {
 		std::cout << "Match Found" << std::endl;
 		NETWORK.DisconnectTCPServer();
-
+		criticsPacketsServer.clear();
 		std::string ipString;
 		int port;
 		int enemyId;
@@ -157,6 +157,7 @@ void PacketManager::Init()
 		});
 
 	EVENT_MANAGER.UDPSubscribe(START_GAME, [this](CustomUDPPacket& customPacket) {
+		std::cout << "ENTRA" << std::endl;
 		SCENE.ChangeScene(new GameScene());
 		
 		SCENE.GetCurrentScene()->SetCurrentPlayer(localIdPlayer);
@@ -164,26 +165,24 @@ void PacketManager::Init()
 		});
 
 	EVENT_MANAGER.UDPSubscribe(SEND_POSITION, [this](CustomUDPPacket& customPacket) {
-		std::cout << "Position Send"<<std::endl;
+		//std::cout << "Position Send"<<std::endl;
 		SendPacketToUDPServer(customPacket);
 		});
 
 	EVENT_MANAGER.UDPSubscribe(VALIDATION_BACK, [this](CustomUDPPacket& customPacket) {
-		std::cout << "Return to a valid Position" << std::endl;
-
 		int returnId = 0;
 		customPacket.ReadVariable(returnId, customPacket.payloadOffset);
-
+		//std::cout << "Return to a valid Position: "<< returnId << std::endl;
 		GAME.GetReferencePlayer()->BacktToValidPosition(returnId);
 		});
 
 	EVENT_MANAGER.UDPSubscribe(VALIDATION_OK, [this](CustomUDPPacket& customPacket) {
-		std::cout << "All movement are OK" << std::endl;
+		//std::cout << "All movement are OK" << std::endl;
 		GAME.GetReferencePlayer()->ResetPositionsPackets();
 		});
 
 	EVENT_MANAGER.UDPSubscribe(INTERPOLATION_POSITION, [this](CustomUDPPacket& customPacket) {
-		std::cout << "Get enemy position" << std::endl;
+		//std::cout << "Get enemy position" << std::endl;
 		
 		int id = 0;
 		sf::Vector2f _position;
@@ -195,13 +194,6 @@ void PacketManager::Init()
 		customPacket.ReadVariable(_position.y, size);
 
 		GAME.GetEnemyPlayer()->AddEnemyPosition(_position, id);
-
-		if (customPacket.udpType == UdpPacketType::CRITIC)
-		{
-			GAME.GetEnemyPlayer()->RestartElapsedTime();
-			GAME.GetEnemyPlayer()->SetStartInterpolate(true);
-		}
-
 		});
 
 	EVENT_MANAGER.UDPSubscribe(SEND_START_SHOOT, [this](CustomUDPPacket& customPacket) {
@@ -229,7 +221,6 @@ void PacketManager::Init()
 
 	EVENT_MANAGER.UDPSubscribe(RECEIVE_STOP_SHOOT, [this](CustomUDPPacket& customPacket) {
 		std::cout << "Stop Shoot" << std::endl;
-		//Activar que el otro jugador pare de disparar
 		GAME.GetEnemyPlayer()->SetShootRequested(false);
 		});
 
@@ -238,8 +229,41 @@ void PacketManager::Init()
 		GAME.GetEnemyPlayer()->SetMockeryRequested(true);
 		});
 
+	EVENT_MANAGER.UDPSubscribe(SEND_RESPAWN, [this](CustomUDPPacket& customPacket) {
+		std::cout << "Send Respawn" << std::endl;
+		criticsPacketsClient.push_back(customPacket);
+		SendPacketToUDPServer(customPacket);
+		});
+
+	EVENT_MANAGER.UDPSubscribe(RECEIVE_RESPAWN, [this](CustomUDPPacket& customPacket) {
+		std::cout << "Receive Respawn" << std::endl;
+		int criticId;
+		bool player;
+		int lives;
+		customPacket.ReadVariable(criticId, customPacket.payloadOffset);
+		customPacket.ReadVariable(player, customPacket.payloadOffset);
+		customPacket.ReadVariable(lives, customPacket.payloadOffset);
+
+		if (player)
+			GAME.GetEnemyPlayer()->CheckIsDead(lives);
+		else
+			GAME.GetReferencePlayer()->CheckIsDead(lives);
+		});
+
+	EVENT_MANAGER.UDPSubscribe(END_GAME, [this](CustomUDPPacket& customPacket) {
+		std::cout << "End Game" << std::endl;
+		std::string message;
+		customPacket.ReadString(message, customPacket.payloadOffset);
+
+		std::cout << message << std::endl;
+
+		SCENE.ChangeScene(new RegisterScene());
+		NETWORK.DisconnectUDPServer();
+		NETWORK.ConnectToServer();
+		});
+
 	EVENT_MANAGER.UDPSubscribe(SEND_ACK, [this](CustomUDPPacket& customPacket) {
-		std::cout << "Send ACK packet" << std::endl;
+		//std::cout << "Send ACK packet" << std::endl;
 
 		//Create UDP Packet 
 		CustomUDPPacket _customPacket(UdpPacketType::NORMAL, RECEIVE_ACK, globalIdPlayer);
@@ -257,7 +281,7 @@ void PacketManager::Init()
 		});
 
 	EVENT_MANAGER.UDPSubscribe(RECEIVE_ACK, [this](CustomUDPPacket& customPacket) {
-		std::cout << "Receive ACK packet" << std::endl;
+		//std::cout << "Receive ACK packet" << std::endl;
 
 		//Read the critic id 
 		int incomingId = 0;
@@ -274,10 +298,10 @@ void PacketManager::Init()
 
 		if (it != criticsPacketsClient.end()) {
 			criticsPacketsClient.erase(it, criticsPacketsClient.end());
-			std::cout << "Removed ACK packet with ID " << incomingId << std::endl;
+			//std::cout << "Removed ACK packet with ID " << incomingId << std::endl;
 		}
 		else {
-			std::cout << "No matching packet found to remove" << std::endl;
+			//std::cout << "No matching packet found to remove" << std::endl;
 		}
 
 		});
@@ -330,13 +354,16 @@ void PacketManager::ProcessUDPReceivedPacket(CustomUDPPacket& customPacket)
 
 void PacketManager::SendPacketToUDPServer(CustomUDPPacket& responsePacket)
 {
+	if (NETWORK.GetNetworkState() != NetworkState::CONNECTED_TO_SERVER_UDP)
+		return;
+
 	if (NETWORK.GetUDPSocket()->send(responsePacket.buffer, responsePacket.bufferSize, NETWORK.GetUDPIPAdrres(), NETWORK.GetUDPPort()) == sf::Socket::Status::Done)
 	{
-		std::cout << "Packet send to UDP server" << std::endl;
+		//std::cout << "Packet send to UDP server" << std::endl;
 	}
 	else
 	{
-		std::cout << "Error sending packet to UDP server" << std::endl;
+		//std::cout << "Error sending packet to UDP server" << std::endl;
 	}
 }
 

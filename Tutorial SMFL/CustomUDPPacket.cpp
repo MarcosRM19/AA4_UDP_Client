@@ -20,8 +20,8 @@ CustomUDPPacket::CustomUDPPacket(UdpPacketType udpType, PacketType type, int pla
 
     ReadVariable(_udpType, a);
     ReadVariable(_type, a);
-    std::cout << "El udpType es: " << static_cast<int>(_udpType) << std::endl;
-    std::cout << "El type es: " << static_cast<int>(type) << std::endl;
+   /* std::cout << "El udpType es: " << static_cast<int>(_udpType) << std::endl;
+    std::cout << "El type es: " << static_cast<int>(type) << std::endl;*/
 
     payloadOffset = bufferSize;
 }
@@ -46,3 +46,40 @@ void CustomUDPPacket::ReadBuffer(const char* inputBuffer, size_t _bufferSize)
 
     payloadOffset = offset;
 }
+
+bool CustomUDPPacket::WriteString(const std::string& str)
+{
+    // Check if there is enough space in the buffer for the lenght data
+    int length = static_cast<int>(str.size());
+    if (!WriteVariable(length))
+        return false;
+
+    // Check if there is enough space in the buffer for the string data
+    if (bufferSize + length > sizeof(buffer))
+        return false;
+
+    // Copy the string data into the buffer
+    std::memcpy(buffer + bufferSize, str.data(), length);
+    bufferSize += length;
+
+    return true;
+}
+
+bool CustomUDPPacket::ReadString(std::string& outStr, size_t& offset) const {
+    int length = 0;
+
+    // Read size of the string
+    if (!ReadVariable(length, offset))
+        return false;
+
+    // Check if the length is valid
+    if (offset + length > bufferSize)
+        return false;
+
+    // Read the string data
+    outStr.assign(buffer + offset, length);
+    offset += length;
+
+    return true;
+}
+
